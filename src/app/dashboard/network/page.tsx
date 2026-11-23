@@ -11,7 +11,7 @@ const categoryNames: Record<string, string> = {
 
 function priceLabel(model: string, amount: number | null, currency: string) {
   if (model === "quote" || amount === null) return "Request a quote";
-  const fractionDigits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+  const fractionDigits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
   const value = amount / (10 ** fractionDigits);
   return new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: fractionDigits }).format(value) + (model === "hourly" ? " / hour" : "");
 }
