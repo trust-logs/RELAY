@@ -9,7 +9,7 @@ export default async function DashboardPage() {
 
   if (error || !claimsData?.claims?.sub) redirect("/login");
 
-  const userId = claimsData.claims.sub;
+  const userId = String(claimsData.claims.sub);
   const email = typeof claimsData.claims.email === "string" ? claimsData.claims.email : "";
   const { data: profile } = await supabase
     .from("profiles")
