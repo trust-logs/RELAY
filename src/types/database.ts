@@ -446,6 +446,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+    save_provider_availability: { Args: { p_timezone: string; p_windows: Json }; Returns: undefined };
+
       accept_proposal: { Args: { p_proposal_id: string }; Returns: string }
       approve_request_plan: { Args: { p_plan_id: string }; Returns: string }
     }
