@@ -727,3 +727,22 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
 .plan-approved-note { margin-top:15px; padding:12px; border-radius:10px; background:#f0f8e9; color:#527b32; font-size:9px; font-weight:800; }
 .plan-disclaimer { display:block; margin-top:15px; color:#96919e; font-size:8px; line-height:1.7; }
 @media(max-width:760px) { .plan-builder { padding:18px; } .plan-builder-empty,.plan-approve-row { align-items:flex-start; flex-direction:column; } .plan-step-list { grid-template-columns:1fr; } .plan-readonly-step { grid-template-columns:28px minmax(0,1fr); } .plan-readonly-step > small { grid-column:2; } }
+
+
+/* RELAY provider intelligence: explainable request matching */
+.provider-match-explainer { display:grid; gap:5px; margin:0 0 15px; padding:15px 17px; border:1px solid #e8e1f4; border-radius:12px; background:#fbfaff; }
+.provider-match-explainer strong { color:var(--ink); font:800 11px Manrope; }
+.provider-match-explainer span { color:var(--violet); font-size:9px; font-weight:800; }
+.provider-match-explainer small { color:#898391; font-size:8px; line-height:1.6; }
+.provider-request-card { position:relative; }
+.provider-match-score { display:inline-flex; align-items:baseline; gap:7px; margin:10px 0 0; padding:7px 10px; border-radius:9px; background:#f0ebff; color:var(--violet); }
+.provider-match-score strong { font:900 17px Manrope; }
+.provider-match-score span { font-size:7px; font-weight:900; letter-spacing:.8px; }
+.provider-match-reasons { display:flex; flex-wrap:wrap; gap:6px; margin:9px 0 12px; }
+.provider-match-reasons span { padding:5px 8px; border-radius:20px; background:#eff8e7; color:#587d37; font-size:7px; font-weight:800; }
+.provider-match-reasons span.is-neutral { background:#f4f2f6; color:#817b8a; }
+.customer-provider-fit { display:grid; gap:4px; margin:8px 0; }
+.customer-provider-fit b { color:var(--violet); font-size:9px; }
+.customer-provider-fit span { color:#898391; font-size:8px; line-height:1.5; }
+.network-count small { display:block; margin-top:5px; color:#96919e; font-size:7px; }
+@media(max-width:600px) { .provider-match-reasons { gap:5px; } .provider-match-reasons span { font-size:6.5px; } }
