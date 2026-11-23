@@ -50,6 +50,12 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: { user_id: string; event_type: string; in_app_enabled: boolean; email_enabled: boolean; push_enabled: boolean; updated_at: string }
+        Insert: { user_id: string; event_type: string; in_app_enabled?: boolean; email_enabled?: boolean; push_enabled?: boolean; updated_at?: string }
+        Update: { user_id?: string; event_type?: string; in_app_enabled?: boolean; email_enabled?: boolean; push_enabled?: boolean; updated_at?: string }
+        Relationships: [{ foreignKeyName: "notification_preferences_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }]
+      }
       notifications: {
         Row: { id: string; user_id: string; actor_id: string | null; project_id: string | null; request_id: string | null; type: string; title: string; body: string; href: string; read_at: string | null; created_at: string }
         Insert: { id?: string; user_id: string; actor_id?: string | null; project_id?: string | null; request_id?: string | null; type: string; title: string; body?: string; href: string; read_at?: string | null; created_at?: string }
