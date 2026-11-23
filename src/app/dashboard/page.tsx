@@ -18,12 +18,17 @@ export default async function DashboardPage() {
     .maybeSingle();
 
   const displayName = profile?.display_name?.trim() || email.split("@")[0] || "there";
+  const { count: unreadNotifications } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .is("read_at", null);
 
   return (
     <main className="dashboard-shell">
       <nav className="nav dashboard-nav">
         <Link className="brand" href="/"><span className="brand-mark">R</span><span>RELAY<span className="brand-period">.</span></span></Link>
-        <form action={signOut}><button className="signout-button" type="submit">Sign out ↗</button></form>
+        <div className="dashboard-nav-actions"><Link className="notification-nav-link" href="/dashboard/notifications">ACTIVITY <span>{unreadNotifications ?? 0}</span></Link><form action={signOut}><button className="signout-button" type="submit">Sign out ↗</button></form></div>
       </nav>
       <section className="dashboard-welcome">
         <div className="auth-kicker"><span className="live-dot" /> YOUR RELAY SPACE</div>
@@ -36,6 +41,7 @@ export default async function DashboardPage() {
         <article className="dashboard-card"><span className="dashboard-card-icon lime-icon">⌂</span><span className="dashboard-label">YOUR ACCOUNT</span><h2>Personal profile</h2><p>Your profile was created automatically when you registered.</p><span className="dashboard-detail">Account type: {profile?.account_type ?? "personal"}</span></article>
         <article className="dashboard-card"><span className="dashboard-card-icon dark-icon">✓</span><span className="dashboard-label">RELAY TRUST</span><h2>Trust starts here.</h2><p>See your verification checks, understand each badge and manage your trust status.</p><Link className="dashboard-detail dashboard-trust-link" href="/dashboard/trust">OPEN VERIFICATION CENTRE ↗</Link></article>
       </section>
+      <section className="notification-dashboard-strip"><div><span className="dashboard-label">RELAY ACTIVITY CENTRE</span><h2>Nothing important slips through.</h2><p>New proposals, project updates and evidence uploads appear in one live activity feed.</p></div><Link href="/dashboard/notifications">OPEN ACTIVITY CENTRE ↗ <span>{unreadNotifications ?? 0} UNREAD</span></Link></section>
       <section className="provider-dashboard-cta"><div><span className="dashboard-label">RELAY NETWORK</span><h2>Find help. Offer your skills.</h2><p>Discover available services or publish what you can do.</p></div><div className="network-dashboard-actions"><Link href="/dashboard/network">EXPLORE SERVICES ↗</Link><Link href="/dashboard/provider">PROVIDER PROFILE ↗</Link><Link href="/dashboard/provider/requests">REQUEST INBOX ↗</Link><Link href="/dashboard/projects">PROJECT WORKSPACE ↗</Link></div></section><footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>You're signed in securely.</span></footer>
     </main>
   );
