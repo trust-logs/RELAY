@@ -14,17 +14,39 @@ type ProviderMatchProfile = {
   verification_status: string | null;
 };
 
-function scoreRequestMatch(category: string | null, provider: ProviderMatchProfile) {
+type AvailabilityWindow = { day_of_week: number; start_time: string; end_time: string; timezone: string };
+
+function matchesRequestedTime(desiredAt: string | null, windows: AvailabilityWindow[]) {
+  if (!desiredAt) return { points: 10, label: "Open to work; timing flexible" };
+  if (!windows.length) return { points: 0, label: "Set weekly hours to match timed requests" };
+  const instant = new Date(desiredAt);
+  for (const window of windows) {
+    try {
+      const parts = new Intl.DateTimeFormat("en", {
+        timeZone: window.timezone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+      }).formatToParts(instant);
+      const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+      const day = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(values.weekday);
+      const minute = Number(values.hour) * 60 + Number(values.minute);
+      const start = Number(window.start_time.slice(0,2)) * 60 + Number(window.start_time.slice(3,5));
+      const end = Number(window.end_time.slice(0,2)) * 60 + Number(window.end_time.slice(3,5));
+      if (day === window.day_of_week && minute >= start && minute < end) return { points: 10, label: "Available at the requested time" };
+    } catch { /* Invalid time zones do not count as availability. */ }
+  }
+  return { points: 0, label: "Outside your listed working hours" };
+}
+
+function scoreRequestMatch(category: string | null, desiredAt: string | null, provider: ProviderMatchProfile, windows: AvailabilityWindow[]) {
   const serviceMatch = Boolean(category && provider.service_categories?.includes(category));
   const experiencePoints = Math.min(Math.max(provider.years_experience ?? 0, 0), 10) * 2;
   const verifiedPoints = provider.verification_status === "verified" ? 20 : 0;
-  const availabilityPoints = provider.accepting_work ? 10 : 0;
-  const score = (serviceMatch ? 50 : 0) + experiencePoints + verifiedPoints + availabilityPoints;
+  const timeFit = provider.accepting_work ? matchesRequestedTime(desiredAt, windows) : { points: 0, label: "Availability is switched off" };
+  const score = (serviceMatch ? 50 : 0) + experiencePoints + verifiedPoints + timeFit.points;
   const reasons = [
     serviceMatch ? "Your listed service matches" : "Outside your selected service categories",
     provider.years_experience !== null ? `${provider.years_experience} years' experience` : "Add experience to improve matching",
     provider.verification_status === "verified" ? "Identity/provider checks verified" : "Verification can strengthen customer confidence",
-    provider.accepting_work ? "Currently accepting work" : "Availability is switched off",
+    timeFit.label,
   ];
   return { score, serviceMatch, reasons };
 }
@@ -43,9 +65,10 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
   if (error || !claims?.claims?.sub) redirect("/login");
   const userId = String(claims.claims.sub);
   const params = await searchParams;
-  const [{ data: provider }, { data: requests }] = await Promise.all([
+  const [{ data: provider }, { data: requests }, { data: availability }] = await Promise.all([
     supabase.from("provider_profiles").select("accepting_work,service_categories,years_experience,verification_status").eq("user_id", userId).maybeSingle(),
     supabase.from("request_publications").select("request_id,title,description,category,budget_amount_minor,currency,desired_at,published_at").order("published_at", { ascending:false }).limit(60),
+    supabase.from("provider_availability").select("day_of_week,start_time,end_time,timezone").eq("user_id", userId),
   ]);
   const { data: myProposals } = await supabase.from("proposals").select("request_id,status").eq("provider_user_id", userId);
   const proposalMap = new Map((myProposals ?? []).map((p) => [p.request_id,p.status]));
@@ -57,7 +80,7 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
   };
   const rankedRequests = (requests ?? []).map((request) => ({
     request,
-    match: scoreRequestMatch(request.category, matchProfile),
+    match: scoreRequestMatch(request.category, request.desired_at, matchProfile, availability ?? []),
   })).sort((a, b) => b.match.score - a.match.score || new Date(b.request.published_at).getTime() - new Date(a.request.published_at).getTime());
   const errors: Record<string,string> = {
     details:"Check your proposal details and try again.", amount:"Enter a valid amount greater than zero.",
@@ -75,7 +98,7 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
       {!provider?.accepting_work ? <div className="network-empty"><span>✳</span><h2>Switch on your availability.</h2><p>Your provider profile must be set to accepting work before you can browse requests or send proposals.</p><Link href="/dashboard/provider">UPDATE PROVIDER PROFILE ↗</Link></div> :
       !requests?.length ? <div className="network-empty"><span>✳</span><h2>No open requests just yet.</h2><p>When customers share requests with the network, they will appear here. Check back soon.</p><Link href="/dashboard/network">EXPLORE SERVICES ↗</Link></div> :
       <>
-      <div className="provider-match-explainer"><strong>How RELAY ranks opportunities</strong><span>Service fit 50% · Experience up to 20% · Verification 20% · Availability 10%</span><small>Scores are guidance, not guarantees. Customers make the final hiring decision.</small></div>
+      <div className="provider-match-explainer"><strong>How RELAY ranks opportunities</strong><span>Service fit 50% · Experience up to 20% · Verification 20% · Requested-time fit 10%</span><small>Timed requests use your weekly hours and time zone. Scores are guidance, not guarantees; customers make the final hiring decision.</small></div>
       <div className="provider-request-stack">{rankedRequests.map(({ request, match }) => {
         const existing = proposalMap.get(request.request_id);
         return <article className="provider-request-card" key={request.request_id}>
