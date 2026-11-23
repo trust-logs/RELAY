@@ -74,6 +74,7 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
       {params.error && errors[params.error] ? <div className="auth-alert">{errors[params.error]}</div> : null}
       {!provider?.accepting_work ? <div className="network-empty"><span>✳</span><h2>Switch on your availability.</h2><p>Your provider profile must be set to accepting work before you can browse requests or send proposals.</p><Link href="/dashboard/provider">UPDATE PROVIDER PROFILE ↗</Link></div> :
       !requests?.length ? <div className="network-empty"><span>✳</span><h2>No open requests just yet.</h2><p>When customers share requests with the network, they will appear here. Check back soon.</p><Link href="/dashboard/network">EXPLORE SERVICES ↗</Link></div> :
+      <>
       <div className="provider-match-explainer"><strong>How RELAY ranks opportunities</strong><span>Service fit 50% · Experience up to 20% · Verification 20% · Availability 10%</span><small>Scores are guidance, not guarantees. Customers make the final hiring decision.</small></div>
       <div className="provider-request-stack">{rankedRequests.map(({ request, match }) => {
         const existing = proposalMap.get(request.request_id);
