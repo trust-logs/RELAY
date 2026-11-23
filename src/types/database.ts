@@ -159,30 +159,45 @@ export type Database = {
           created_at: string
           description: string | null
           headline: string | null
+          provider_kind: string
+          service_area_label: string | null
+          service_categories: string[]
           service_radius_km: number | null
           updated_at: string
           user_id: string
           verification_status: string
+          website_url: string | null
+          years_experience: number | null
         }
         Insert: {
           accepting_work?: boolean
           created_at?: string
           description?: string | null
           headline?: string | null
+          provider_kind?: string
+          service_area_label?: string | null
+          service_categories?: string[]
           service_radius_km?: number | null
           updated_at?: string
           user_id: string
           verification_status?: string
+          website_url?: string | null
+          years_experience?: number | null
         }
         Update: {
           accepting_work?: boolean
           created_at?: string
           description?: string | null
           headline?: string | null
+          provider_kind?: string
+          service_area_label?: string | null
+          service_categories?: string[]
           service_radius_km?: number | null
           updated_at?: string
           user_id?: string
           verification_status?: string
+          website_url?: string | null
+          years_experience?: number | null
         }
         Relationships: [
           {
