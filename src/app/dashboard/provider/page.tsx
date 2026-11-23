@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { saveProviderProfile } from "@/app/actions/provider";
+import { saveProviderProfile, saveProviderAvailability } from "@/app/actions/provider";
 import { signOut } from "@/app/actions/auth";
 
-type ProviderPageProps = { searchParams: Promise<{ error?: string; saved?: string }> };
+type ProviderPageProps = { searchParams: Promise<{ error?: string; saved?: string; scheduleSaved?: string }> };
 
 const categories = [
   ["errands", "Errands & pickups"],
@@ -20,6 +20,7 @@ const errors: Record<string, string> = {
   details: "Please complete the required fields and select at least one service category.",
   number: "Check your service radius and years of experience.",
   website: "Enter a complete website address beginning with https:// or http://.",
+  schedule: "Check your time zone and availability hours. End time must be after start time.",
   save: "We couldn't save your provider profile. Please try again.",
   notaccepting: "Turn on accepting work in your provider profile before sending proposals.",
 };
@@ -31,6 +32,9 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
 
   const userId = String(claimsData.claims.sub);
   const params = await searchParams;
+  const { data: availability } = await supabase.from("provider_availability").select("day_of_week,start_time,end_time,timezone").eq("user_id", userId).order("day_of_week");
+  const availabilityByDay = new Map((availability ?? []).map((window) => [window.day_of_week, window]));
+  const timezone = availability?.[0]?.timezone ?? "Africa/Lagos";
   const { data: provider } = await supabase
     .from("provider_profiles")
     .select("provider_kind, headline, description, service_area_label, service_radius_km, years_experience, website_url, service_categories, accepting_work, verification_status")
@@ -58,6 +62,7 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
         </div>
 
         {params.saved === "1" ? <div className="request-success">✓ Your provider profile has been saved.</div> : null}
+        {params.scheduleSaved === "1" ? <div className="request-success">✓ Your weekly availability has been saved.</div> : null}
         {params.error && errors[params.error] ? <div className="auth-alert">{errors[params.error]}</div> : null}
 
         <form action={saveProviderProfile} className="provider-form">
@@ -80,6 +85,23 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
             <div><label htmlFor="provider-experience">Years of experience</label><input id="provider-experience" name="years_experience" type="number" min="0" max="80" defaultValue={provider?.years_experience ?? ""} placeholder="e.g. 3" /></div>
           </div>
           <label className="provider-availability-option"><input type="checkbox" name="accepting_work" value="true" defaultChecked={provider?.accepting_work ?? true} /><span><strong>Im accepting new work</strong><small>Allow your provider profile to receive matching requests and send proposals. You can switch this off whenever you need a break.</small></span></label>
+          <div className="provider-form-intro provider-form-section"><span className="dashboard-label">04 · WHEN YOU WORK</span><h2>Set your weekly availability</h2><p>Choose the days and hours you can normally take jobs. RELAY uses this schedule to check requests with a specific date and time.</p></div>
+          <form action={saveProviderAvailability} className="provider-schedule-form">
+            <label htmlFor="provider-timezone">Your time zone</label>
+            <input id="provider-timezone" name="timezone" required maxLength={80} defaultValue={timezone} placeholder="e.g. Africa/Lagos or Europe/London" />
+            <div className="provider-week-grid">
+              {["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map((day, index) => {
+                const window = availabilityByDay.get(index);
+                return <div className="provider-week-row" key={day}>
+                  <label className="provider-week-day"><input type="checkbox" name={"availability_enabled_" + index} value="true" defaultChecked={Boolean(window)} /><strong>{day}</strong></label>
+                  <label><span>From</span><input aria-label={day + " start time"} type="time" name={"availability_start_" + index} defaultValue={window?.start_time?.slice(0,5) ?? "09:00"} /></label>
+                  <label><span>To</span><input aria-label={day + " end time"} type="time" name={"availability_end_" + index} defaultValue={window?.end_time?.slice(0,5) ?? "17:00"} /></label>
+                </div>;
+              })}
+            </div>
+            <p className="provider-form-note">Unticked days are treated as unavailable. You can update your hours at any time.</p>
+            <button className="auth-submit" type="submit">Save weekly availability <span>↗</span></button>
+          </form>
           <label htmlFor="provider-website">Website or portfolio (optional)</label>
           <input id="provider-website" name="website_url" type="url" defaultValue={provider?.website_url ?? ""} placeholder="https://yourwebsite.com" />
           <div className="provider-form-note"><strong>Important:</strong> Saving this profile does not grant a verification badge. Once saved, you can publish individual services for customers to discover.</div>
