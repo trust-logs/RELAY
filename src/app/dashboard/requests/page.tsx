@@ -6,6 +6,14 @@ import { publishRequest, unpublishRequest, acceptProposal } from "@/app/actions/
 
 type RequestsPageProps = { searchParams: Promise<{ created?: string; published?: string; unpublished?: string; error?: string }> };
 
+function providerFit(category: string | null, provider: { verification_status: string | null; years_experience: number | null; service_categories: string[] | null; accepting_work: boolean | null }) {
+  const service = Boolean(category && provider.service_categories?.includes(category));
+  const experience = Math.min(Math.max(provider.years_experience ?? 0, 0), 10) * 2;
+  const verification = provider.verification_status === "verified" ? 20 : 0;
+  const availability = provider.accepting_work ? 10 : 0;
+  return { score: (service ? 50 : 0) + experience + verification + availability, service };
+}
+
 function formatBudget(amount: number | null, currency: string | null) {
   if (amount === null || !currency) return "Budget not set";
   try {
@@ -39,7 +47,7 @@ export default async function RequestsPage({ searchParams }: RequestsPageProps) 
   const providerIds = [...new Set((proposals ?? []).map((p) => p.provider_user_id))];
   const [{ data: profiles }, { data: providerProfiles }] = providerIds.length ? await Promise.all([
     supabase.from("profiles").select("id,display_name").in("id",providerIds),
-    supabase.from("provider_profiles").select("user_id,verification_status,headline").in("user_id",providerIds),
+    supabase.from("provider_profiles").select("user_id,verification_status,headline,years_experience,service_categories,accepting_work").in("user_id",providerIds),
   ]) : [{ data: [] }, { data: [] }];
   const publishedSet = new Set((publications ?? []).map((p) => p.request_id));
   const profileMap = new Map((profiles ?? []).map((p) => [p.id,p]));
@@ -72,7 +80,8 @@ export default async function RequestsPage({ searchParams }: RequestsPageProps) 
               requestProposals.map((proposal) => {
                 const profile = profileMap.get(proposal.provider_user_id);
                 const provider = providerMap.get(proposal.provider_user_id);
-                return <div className="request-proposal-row" key={proposal.id}><div><strong>{profile?.display_name || "RELAY provider"} {provider?.verification_status === "verified" ? <span className="network-verified">✓ VERIFIED</span> : null}</strong><p>{proposal.message}</p><small>{proposal.estimated_duration || "Timing to be discussed"} · {new Date(proposal.created_at).toLocaleDateString()}</small></div><div className="request-proposal-price"><strong>{formatQuote(proposal.amount_minor,proposal.currency)}</strong><span>{proposal.status}</span>{proposal.status === "pending" && request.status === "open" ? <form action={acceptProposal}><input type="hidden" name="proposal_id" value={proposal.id}/><button className="proposal-accept-button" type="submit">Accept proposal ↗</button></form> : null}</div></div>;
+                const fit = provider ? providerFit(request.category, provider) : null;
+                return <div className="request-proposal-row" key={proposal.id}><div><strong>{profile?.display_name || "RELAY provider"} {provider?.verification_status === "verified" ? <span className="network-verified">✓ VERIFIED</span> : null}</strong>{fit ? <div className="customer-provider-fit"><b>{fit.score}% request fit</b><span>{fit.service ? "Service category matches" : "Service category differs"} · {provider?.years_experience ?? 0} yrs experience · {provider?.accepting_work ? "Open to work" : "Not currently accepting work"}</span></div> : null}<p>{proposal.message}</p><small>{proposal.estimated_duration || "Timing to be discussed"} · {new Date(proposal.created_at).toLocaleDateString()}</small></div><div className="request-proposal-price"><strong>{formatQuote(proposal.amount_minor,proposal.currency)}</strong><span>{proposal.status}</span>{proposal.status === "pending" && request.status === "open" ? <form action={acceptProposal}><input type="hidden" name="proposal_id" value={proposal.id}/><button className="proposal-accept-button" type="submit">Accept proposal ↗</button></form> : null}</div></div>;
               })}
           </div> : <div className="request-private-note">Private to you. Share it with providers only when you're ready.</div>}
         </article>;
