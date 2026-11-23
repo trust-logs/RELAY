@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createRequest } from "@/app/actions/requests";
-import { signOut } from "@/app/actions/auth";\nimport { RequestScheduleField } from "./request-schedule";
+import { signOut } from "@/app/actions/auth";
+import { RequestScheduleField } from "./request-schedule";
 
 type NewRequestPageProps = {
   searchParams: Promise<{ error?: string }>;
@@ -58,7 +59,8 @@ export default async function NewRequestPage({ searchParams }: NewRequestPagePro
             <option value="professional">Professional service</option>
             <option value="other">Other</option>
           </select>
-          <RequestScheduleField />\n          <div className="request-budget-grid">
+          <RequestScheduleField />
+          <div className="request-budget-grid">
             <div><label htmlFor="request-budget">Your budget (optional)</label><input id="request-budget" name="budget" type="number" min="0" step="any" placeholder="e.g. 25000" /></div>
             <div><label htmlFor="request-currency">Currency</label><input id="request-currency" name="currency" defaultValue="NGN" maxLength={3} minLength={3} placeholder="NGN" /></div>
           </div>
