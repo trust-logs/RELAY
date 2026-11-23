@@ -35,7 +35,7 @@ export async function createRequest(formData: FormData) {
       const fractionDigits = new Intl.NumberFormat("en", {
         style: "currency",
         currency: currencyRaw,
-      }).resolvedOptions().maximumFractionDigits;
+      }).resolvedOptions().maximumFractionDigits ?? 2;
       const multiplier = 10 ** fractionDigits;
       budgetAmountMinor = Math.round(amount * multiplier);
       currency = currencyRaw;
