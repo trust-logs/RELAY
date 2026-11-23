@@ -344,6 +344,21 @@ export type Database = {
           { foreignKeyName: "proposals_provider_user_id_fkey"; columns: ["provider_user_id"]; isOneToOne: false; referencedRelation: "provider_profiles"; referencedColumns: ["user_id"] }
         ]
       }
+      project_milestones: {
+        Row: { id: string; project_id: string; title: string; description: string; due_at: string | null; status: string; completed_at: string | null; sort_order: number; created_by: string; created_at: string; updated_at: string }
+        Insert: { id?: string; project_id: string; title: string; description?: string; due_at?: string | null; status?: string; completed_at?: string | null; sort_order?: number; created_by: string; created_at?: string; updated_at?: string }
+        Update: { id?: string; project_id?: string; title?: string; description?: string; due_at?: string | null; status?: string; completed_at?: string | null; sort_order?: number; created_by?: string; created_at?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "project_milestones_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] }]
+      }
+      project_messages: {
+        Row: { id: string; project_id: string; sender_id: string; body: string; message_type: string; created_at: string }
+        Insert: { id?: string; project_id: string; sender_id: string; body: string; message_type?: string; created_at?: string }
+        Update: { id?: string; project_id?: string; sender_id?: string; body?: string; message_type?: string; created_at?: string }
+        Relationships: [
+          { foreignKeyName: "project_messages_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_messages_sender_id_fkey"; columns: ["sender_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }
+        ]
+      }
       service_listings: {
         Row: { category: string; created_at: string; currency: string; description: string; id: string; is_active: boolean; price_amount_minor: number | null; pricing_model: string; provider_user_id: string; title: string; updated_at: string }
         Insert: { category: string; created_at?: string; currency?: string; description: string; id?: string; is_active?: boolean; price_amount_minor?: number | null; pricing_model?: string; provider_user_id: string; title: string; updated_at?: string }
