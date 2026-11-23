@@ -79,6 +79,7 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
             <div><label htmlFor="provider-radius">Travel radius (km)</label><input id="provider-radius" name="service_radius_km" type="number" min="1" max="500" defaultValue={provider?.service_radius_km ?? 25} /></div>
             <div><label htmlFor="provider-experience">Years of experience</label><input id="provider-experience" name="years_experience" type="number" min="0" max="80" defaultValue={provider?.years_experience ?? ""} placeholder="e.g. 3" /></div>
           </div>
+          <label className="provider-availability-option"><input type="checkbox" name="accepting_work" value="true" defaultChecked={provider?.accepting_work ?? true} /><span><strong>Im accepting new work</strong><small>Allow your provider profile to receive matching requests and send proposals. You can switch this off whenever you need a break.</small></span></label>
           <label htmlFor="provider-website">Website or portfolio (optional)</label>
           <input id="provider-website" name="website_url" type="url" defaultValue={provider?.website_url ?? ""} placeholder="https://yourwebsite.com" />
           <div className="provider-form-note"><strong>Important:</strong> Saving this profile does not grant a verification badge. Once saved, you can publish individual services for customers to discover.</div>
