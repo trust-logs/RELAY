@@ -16,9 +16,14 @@ export async function createRequest(formData: FormData) {
   const category = String(formData.get("category") ?? "").trim();
   const locationLabel = String(formData.get("location_label") ?? "").trim();
   const budgetRaw = String(formData.get("budget") ?? "").trim();
-  const currencyRaw = String(formData.get("currency") ?? "NGN").trim().toUpperCase();\n  const desiredAtRaw = String(formData.get("desired_at") ?? "").trim();\n  const allowedCategories = new Set(["", "errands", "home", "office", "property", "field", "professional", "other"]);\n  const desiredAt = desiredAtRaw ? new Date(desiredAtRaw) : null;
+  const currencyRaw = String(formData.get("currency") ?? "NGN").trim().toUpperCase();
+  const desiredAtRaw = String(formData.get("desired_at") ?? "").trim();
+  const allowedCategories = new Set(["", "errands", "home", "office", "property", "field", "professional", "other"]);
+  const desiredAt = desiredAtRaw ? new Date(desiredAtRaw) : null;
 
-  if (title.length < 3 || title.length > 160 || description.length < 10 || description.length > 5000 ||\n      locationLabel.length > 240 || !allowedCategories.has(category) ||\n      (desiredAtRaw && (!desiredAt || Number.isNaN(desiredAt.getTime()) || desiredAt.getTime() <= Date.now() || desiredAt.getTime() > Date.now() + 2 * 365 * 24 * 60 * 60 * 1000))) {
+  if (title.length < 3 || title.length > 160 || description.length < 10 || description.length > 5000 ||
+      locationLabel.length > 240 || !allowedCategories.has(category) ||
+      (desiredAtRaw && (!desiredAt || Number.isNaN(desiredAt.getTime()) || desiredAt.getTime() <= Date.now() || desiredAt.getTime() > Date.now() + 2 * 365 * 24 * 60 * 60 * 1000))) {
     redirect("/dashboard/requests/new?error=invalid");
   }
 
