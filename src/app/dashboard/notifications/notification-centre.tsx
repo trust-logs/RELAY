@@ -94,7 +94,7 @@ export default function NotificationCentre({
     <main className="dashboard-shell notification-centre">
       <nav className="nav dashboard-nav">
         <Link className="brand" href="/dashboard"><span className="brand-mark">R</span><span>RELAY<span className="brand-period">.</span></span></Link>
-        <Link className="signout-button" href="/dashboard">BACK TO DASHBOARD ↗</Link>
+        <div className="dashboard-nav-actions"><Link className="notification-nav-link" href="/dashboard/notifications/settings">PREFERENCES ⚙</Link><Link className="signout-button" href="/dashboard">BACK TO DASHBOARD ↗</Link></div>
       </nav>
       <section className="network-heading notification-heading">
         <div className="auth-kicker"><span className="live-dot" /> YOUR ACTIVITY</div>
