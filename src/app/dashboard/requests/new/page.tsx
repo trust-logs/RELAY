@@ -2,14 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createRequest } from "@/app/actions/requests";
-import { signOut } from "@/app/actions/auth";
+import { signOut } from "@/app/actions/auth";\nimport { RequestScheduleField } from "./request-schedule";
 
 type NewRequestPageProps = {
   searchParams: Promise<{ error?: string }>;
 };
 
 const errorMessages: Record<string, string> = {
-  invalid: "Add a title with at least 3 characters. Your description must be under 5,000 characters.",
+  invalid: "Add a title, provide at least 10 characters of detail, and choose a future target time if needed.",
   budget: "Enter a valid budget and a three-letter currency code.",
   currency: "That currency code isn't recognised. Try a valid ISO currency code such as NGN, USD, GBP or EUR.",
   save: "We couldn't save your request. Please try again.",
@@ -58,7 +58,7 @@ export default async function NewRequestPage({ searchParams }: NewRequestPagePro
             <option value="professional">Professional service</option>
             <option value="other">Other</option>
           </select>
-          <div className="request-budget-grid">
+          <RequestScheduleField />\n          <div className="request-budget-grid">
             <div><label htmlFor="request-budget">Your budget (optional)</label><input id="request-budget" name="budget" type="number" min="0" step="any" placeholder="e.g. 25000" /></div>
             <div><label htmlFor="request-currency">Currency</label><input id="request-currency" name="currency" defaultValue="NGN" maxLength={3} minLength={3} placeholder="NGN" /></div>
           </div>
