@@ -235,3 +235,8 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
   .dashboard-card { min-height: 240px; }
   .dashboard-footer { gap: 12px; flex-wrap: wrap; }
 }
+
+.nav-auth { display: flex; align-items: center; gap: 18px; }
+.nav-login { color: #686573; font-size: 12px; font-weight: 700; }
+.nav-login:hover { color: var(--violet); }
+@media (max-width: 800px) { .nav-auth { gap: 10px; } }
