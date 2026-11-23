@@ -85,7 +85,13 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
             <div><label htmlFor="provider-experience">Years of experience</label><input id="provider-experience" name="years_experience" type="number" min="0" max="80" defaultValue={provider?.years_experience ?? ""} placeholder="e.g. 3" /></div>
           </div>
           <label className="provider-availability-option"><input type="checkbox" name="accepting_work" value="true" defaultChecked={provider?.accepting_work ?? true} /><span><strong>Im accepting new work</strong><small>Allow your provider profile to receive matching requests and send proposals. You can switch this off whenever you need a break.</small></span></label>
-          <div className="provider-form-intro provider-form-section"><span className="dashboard-label">04 · WHEN YOU WORK</span><h2>Set your weekly availability</h2><p>Choose the days and hours you can normally take jobs. RELAY uses this schedule to check requests with a specific date and time.</p></div>
+          <label htmlFor="provider-website">Website or portfolio (optional)</label>
+          <input id="provider-website" name="website_url" type="url" defaultValue={provider?.website_url ?? ""} placeholder="https://yourwebsite.com" />
+          <div className="provider-form-note"><strong>Important:</strong> Saving this profile does not grant a verification badge. Once saved, you can publish individual services for customers to discover.</div>
+          <button className="auth-submit" type="submit">Save provider profile <span>↗</span></button>
+          <Link className="request-cancel" href="/dashboard/provider/requests">Browse customer requests ↗</Link><Link className="request-cancel" href="/dashboard/provider/listings">Manage my service listings ↗</Link><Link className="request-cancel" href="/dashboard">Return to dashboard</Link>
+        </form>
+                  <div className="provider-form-intro provider-form-section"><span className="dashboard-label">04 · WHEN YOU WORK</span><h2>Set your weekly availability</h2><p>Choose the days and hours you can normally take jobs. RELAY uses this schedule to check requests with a specific date and time.</p></div>
           <form action={saveProviderAvailability} className="provider-schedule-form">
             <label htmlFor="provider-timezone">Your time zone</label>
             <input id="provider-timezone" name="timezone" required maxLength={80} defaultValue={timezone} placeholder="e.g. Africa/Lagos or Europe/London" />
@@ -102,12 +108,7 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
             <p className="provider-form-note">Unticked days are treated as unavailable. You can update your hours at any time.</p>
             <button className="auth-submit" type="submit">Save weekly availability <span>↗</span></button>
           </form>
-          <label htmlFor="provider-website">Website or portfolio (optional)</label>
-          <input id="provider-website" name="website_url" type="url" defaultValue={provider?.website_url ?? ""} placeholder="https://yourwebsite.com" />
-          <div className="provider-form-note"><strong>Important:</strong> Saving this profile does not grant a verification badge. Once saved, you can publish individual services for customers to discover.</div>
-          <button className="auth-submit" type="submit">Save provider profile <span>↗</span></button>
-          <Link className="request-cancel" href="/dashboard/provider/requests">Browse customer requests ↗</Link><Link className="request-cancel" href="/dashboard/provider/listings">Manage my service listings ↗</Link><Link className="request-cancel" href="/dashboard">Return to dashboard</Link>
-        </form>
+
       </section>
       <footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>Good work starts with a clear profile.</span></footer>
     </main>
