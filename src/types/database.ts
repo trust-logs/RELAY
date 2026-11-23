@@ -346,6 +346,12 @@ export type Database = {
           },
         ]
       }
+      request_plans: {
+        Row: { id: string; project_id: string; created_by: string; title: string; summary: string; source: string; status: string; steps: Json; approved_at: string | null; created_at: string; updated_at: string }
+        Insert: { id?: string; project_id: string; created_by: string; title: string; summary?: string; source?: string; status?: string; steps: Json; approved_at?: string | null; created_at?: string; updated_at?: string }
+        Update: { id?: string; project_id?: string; created_by?: string; title?: string; summary?: string; source?: string; status?: string; steps?: Json; approved_at?: string | null; created_at?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "request_plans_project_id_fkey"; columns: ["project_id"]; isOneToOne: true; referencedRelation: "projects"; referencedColumns: ["id"] }]
+      }
       request_publications: {
         Row: { request_id: string; title: string; description: string; category: string | null; budget_amount_minor: number | null; currency: string | null; desired_at: string | null; published_at: string }
         Insert: { request_id: string; title: string; description: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; desired_at?: string | null; published_at?: string }
@@ -441,6 +447,7 @@ export type Database = {
     }
     Functions: {
       accept_proposal: { Args: { p_proposal_id: string }; Returns: string }
+      approve_request_plan: { Args: { p_plan_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
