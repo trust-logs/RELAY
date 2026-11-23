@@ -80,9 +80,9 @@ export default async function ProviderPage({ searchParams }: ProviderPageProps) 
           </div>
           <label htmlFor="provider-website">Website or portfolio (optional)</label>
           <input id="provider-website" name="website_url" type="url" defaultValue={provider?.website_url ?? ""} placeholder="https://yourwebsite.com" />
-          <div className="provider-form-note"><strong>Important:</strong> Saving this profile does not grant a verification badge or guarantee work. RELAY will introduce public provider discovery after the review and trust controls are ready.</div>
+          <div className="provider-form-note"><strong>Important:</strong> Saving this profile does not grant a verification badge. Once saved, you can publish individual services for customers to discover.</div>
           <button className="auth-submit" type="submit">Save provider profile <span>↗</span></button>
-          <Link className="request-cancel" href="/dashboard">Return to dashboard</Link>
+          <Link className="request-cancel" href="/dashboard/provider/listings">Manage my service listings ↗</Link><Link className="request-cancel" href="/dashboard">Return to dashboard</Link>
         </form>
       </section>
       <footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>Good work starts with a clear profile.</span></footer>
