@@ -34,7 +34,7 @@ export default async function DashboardPage() {
       <section className="dashboard-grid">
         <article className="dashboard-card dashboard-card-main"><span className="dashboard-card-icon">✳</span><span className="dashboard-label">YOUR NEXT MOVE</span><h2>What needs<br />to get done?</h2><p>We're preparing your request workspace. Soon you'll be able to describe an outcome and organise the steps to make it happen.</p><span className="coming-soon">REQUEST WORKSPACE · COMING NEXT</span></article>
         <article className="dashboard-card"><span className="dashboard-card-icon lime-icon">⌂</span><span className="dashboard-label">YOUR ACCOUNT</span><h2>Personal profile</h2><p>Your profile was created automatically when you registered.</p><span className="dashboard-detail">Account type: {profile?.account_type ?? "personal"}</span></article>
-        <article className="dashboard-card"><span className="dashboard-card-icon dark-icon">✓</span><span className="dashboard-label">RELAY TRUST</span><h2>Trust starts here.</h2><p>Email confirmation activates your account. Identity and professional checks are separate steps.</p><span className="coming-soon">VERIFICATION CENTRE · NEXT PHASE</span></article>
+        <article className="dashboard-card"><span className="dashboard-card-icon dark-icon">✓</span><span className="dashboard-label">RELAY TRUST</span><h2>Trust starts here.</h2><p>See your verification checks, understand each badge and manage your trust status.</p><Link className="dashboard-detail dashboard-trust-link" href="/dashboard/trust">OPEN VERIFICATION CENTRE ↗</Link></article>
       </section>
       <footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>You're signed in securely.</span></footer>
     </main>
