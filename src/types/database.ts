@@ -50,6 +50,17 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: { id: string; user_id: string; actor_id: string | null; project_id: string | null; request_id: string | null; type: string; title: string; body: string; href: string; read_at: string | null; created_at: string }
+        Insert: { id?: string; user_id: string; actor_id?: string | null; project_id?: string | null; request_id?: string | null; type: string; title: string; body?: string; href: string; read_at?: string | null; created_at?: string }
+        Update: { id?: string; user_id?: string; actor_id?: string | null; project_id?: string | null; request_id?: string | null; type?: string; title?: string; body?: string; href?: string; read_at?: string | null; created_at?: string }
+        Relationships: [
+          { foreignKeyName: "notifications_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "notifications_actor_id_fkey"; columns: ["actor_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "notifications_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "notifications_request_id_fkey"; columns: ["request_id"]; isOneToOne: false; referencedRelation: "requests"; referencedColumns: ["id"] }
+        ]
+      }
       project_members: {
         Row: {
           added_by: string
