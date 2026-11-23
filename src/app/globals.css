@@ -625,3 +625,22 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
  .notification-title-line { flex-direction:column; gap:5px; }
  .notification-row { padding:14px; gap:10px; }
 }
+
+
+/* RELAY notification preference controls */
+.preference-panel { margin-top:22px; padding:22px; border:1px solid #e9e4f0; border-radius:16px; background:#fff; }
+.preference-columns { display:grid; grid-template-columns:1fr 110px; padding:0 0 13px; border-bottom:1px solid #eeeaf3; color:#9993a1; font-size:8px; font-weight:900; letter-spacing:.9px; }
+.preference-columns span:last-child { text-align:center; }
+.preference-row { display:grid; grid-template-columns:1fr 110px; align-items:center; gap:14px; padding:17px 0; border-bottom:1px solid #f0edf4; }
+.preference-row h2 { margin:0 0 5px; color:var(--ink); font:800 12px Manrope; }
+.preference-row p { margin:0; color:#817c89; font-size:10px; line-height:1.6; }
+.preference-switch { justify-self:center; position:relative; width:43px; height:25px; padding:3px; border:0; border-radius:20px; background:#d9d5df; cursor:pointer; transition:background .2s; }
+.preference-switch span { display:block; width:19px; height:19px; border-radius:50%; background:white; box-shadow:0 1px 3px #0002; transition:transform .2s; }
+.preference-switch.is-on { background:var(--violet); }
+.preference-switch.is-on span { transform:translateX(18px); }
+.preference-switch:disabled { opacity:.6; cursor:wait; }
+.preference-coming { margin-top:18px; padding:16px; border-radius:12px; background:#f7f5fa; }
+.preference-coming strong { color:var(--ink); font:800 11px Manrope; }
+.preference-coming p,.preference-notice { margin:6px 0 0; color:#817c89; font-size:10px; line-height:1.7; }
+.preference-notice { min-height:16px; color:var(--violet); }
+@media(max-width:600px){.preference-panel{padding:15px}.preference-columns,.preference-row{grid-template-columns:1fr 82px}.preference-row{gap:8px}}
