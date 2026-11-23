@@ -37,10 +37,11 @@ export async function createRequest(formData: FormData) {
     }
 
     try {
-      const fractionDigits = new Intl.NumberFormat("en", {
+      const resolvedFractionDigits = new Intl.NumberFormat("en", {
         style: "currency",
         currency: currencyRaw,
-      }).resolvedOptions().maximumFractionDigits ?? 2;
+      }).resolvedOptions().maximumFractionDigits;
+      const fractionDigits: number = typeof resolvedFractionDigits === "number" ? resolvedFractionDigits : 2;
       const multiplier = 10 ** fractionDigits;
       budgetAmountMinor = Math.round(amount * multiplier);
       currency = currencyRaw;
@@ -57,6 +58,7 @@ export async function createRequest(formData: FormData) {
     location_label: locationLabel || null,
     budget_amount_minor: budgetAmountMinor,
     currency,
+    desired_at: desiredAt?.toISOString() ?? null,
     status: "open",
   });
 
