@@ -226,6 +226,12 @@ export type Database = {
           },
         ]
       }
+      provider_availability: {
+        Row: { id: string; user_id: string; day_of_week: number; start_time: string; end_time: string; timezone: string; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; day_of_week: number; start_time: string; end_time: string; timezone?: string; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; day_of_week?: number; start_time?: string; end_time?: string; timezone?: string; created_at?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "provider_availability_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "provider_profiles"; referencedColumns: ["user_id"] }]
+      }
       requests: {
         Row: {
           budget_amount_minor: number | null
