@@ -38,7 +38,7 @@ export default function HomePage() {
           <a href="#environments">Explore RELAY</a>
           <a href="#trust">Trust & safety</a>
         </div>
-        <a className="nav-cta" href="mailto:hello@relay.example">Get early access <span>↗</span></a>
+        <div className="nav-auth"><a className="nav-login" href="/login">Sign in</a><a className="nav-cta" href="/signup">Join RELAY <span>↗</span></a></div>
       </nav>
 
       <section className="hero shell">
@@ -49,7 +49,7 @@ export default function HomePage() {
             Life doesn't wait. RELAY brings people, services, and smart coordination together to get real things done.
           </p>
           <div className="hero-actions">
-            <a className="button button-primary" href="#how-it-works">See how RELAY works <span>↗</span></a>
+            <a className="button button-primary" href="/signup">Get started with RELAY <span>↗</span></a>
             <a className="button button-quiet" href="#environments">Explore the platform</a>
           </div>
           <div className="hero-proof">
