@@ -59,7 +59,6 @@ export async function saveProviderProfile(formData: FormData) {
     years_experience: experience,
     website_url: websiteUrl,
     service_categories: [...new Set(categories)],
-    updated_at: new Date().toISOString(),
   }, { onConflict: "user_id" });
 
   if (error) redirect("/dashboard/provider?error=save");
