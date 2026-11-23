@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
-import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus, sendProjectMessage } from "@/app/actions/project-execution";
+import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus } from "@/app/actions/project-execution";
+import ProjectLiveUpdates from "./project-live-updates";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> };
 const taskLabels: Record<string,string> = { todo:"To do", in_progress:"In progress", blocked:"Blocked", completed:"Completed", cancelled:"Cancelled" };
@@ -22,13 +23,13 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const { data: project } = await supabase.from("projects").select("id,title,description,status,budget_amount_minor,currency,created_by,created_at,due_at").eq("id",id).maybeSingle();
   if (!project) notFound();
   const isOwner = project.created_by === userId;
-  const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}] = await Promise.all([
+  const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}, {data: attachments}] = await Promise.all([
     supabase.from("tasks").select("id,title,description,status,assigned_to,due_at,completed_at,created_at").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_milestones").select("id,title,description,status,due_at,completed_at,sort_order").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_messages").select("id,sender_id,body,message_type,created_at").eq("project_id",id).order("created_at").limit(100),
     supabase.from("project_members").select("user_id,member_role").eq("project_id",id),
   ]);
-  const ids = [...new Set([...(members ?? []).map(m=>m.user_id),...(messages ?? []).map(m=>m.sender_id)])];
+  const ids = [...new Set([...(members ?? []).map(m=>m.user_id),...(messages ?? []).map(m=>m.sender_id),...(attachments ?? []).map(a=>a.uploaded_by)])];
   const {data: profiles} = ids.length ? await supabase.from("profiles").select("id,display_name").in("id",ids) : {data:[]};
   const names = new Map((profiles ?? []).map(p=>[p.id,p.display_name || "RELAY member"]));
   const assignedMembers = (members ?? []).filter(m=>m.user_id !== userId);
@@ -72,11 +73,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
           </form></details> : null}
         </section>
       </div>
-      <section className="workspace-panel workspace-conversation">
-        <div className="workspace-panel-heading"><div><span className="network-category">KEEP EVERYONE ALIGNED</span><h2>Project conversation</h2></div><span>{messages?.length ?? 0} MESSAGES</span></div>
-        <div className="workspace-messages">{!messages?.length ? <p className="workspace-empty">No messages yet. Start the conversation.</p> : messages.map(msg=><article className={`workspace-message ${msg.sender_id === userId ? "is-mine" : ""}`} key={msg.id}><div><strong>{names.get(msg.sender_id) ?? "RELAY member"}</strong><small>{new Date(msg.created_at).toLocaleString()}</small></div><p>{msg.body}</p></article>)}</div>
-        <form action={sendProjectMessage} className="workspace-message-form"><input type="hidden" name="project_id" value={id}/><textarea name="body" rows={2} required maxLength={4000} placeholder="Send a project update or message…"/><button type="submit">Send message ↗</button></form>
-      </section>
+      <ProjectLiveUpdates projectId={id} userId={userId} initialMessages={messages ?? []} initialAttachments={attachments ?? []} names={Object.fromEntries(names)} />
     </section>
     <footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>Make it happen, together.</span></footer>
   </main>;
