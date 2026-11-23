@@ -28,6 +28,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
     supabase.from("project_milestones").select("id,title,description,status,due_at,completed_at,sort_order").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_messages").select("id,sender_id,body,message_type,created_at").eq("project_id",id).order("created_at").limit(100),
     supabase.from("project_members").select("user_id,member_role").eq("project_id",id),
+    supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at").eq("project_id",id).order("created_at",{ascending:false}),
   ]);
   const ids = [...new Set([...(members ?? []).map(m=>m.user_id),...(messages ?? []).map(m=>m.sender_id),...(attachments ?? []).map(a=>a.uploaded_by)])];
   const {data: profiles} = ids.length ? await supabase.from("profiles").select("id,display_name").in("id",ids) : {data:[]};
