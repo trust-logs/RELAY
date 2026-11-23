@@ -21,6 +21,7 @@ const errors: Record<string, string> = {
   number: "Check your service radius and years of experience.",
   website: "Enter a complete website address beginning with https:// or http://.",
   save: "We couldn't save your provider profile. Please try again.",
+  notaccepting: "Turn on accepting work in your provider profile before sending proposals.",
 };
 
 export default async function ProviderPage({ searchParams }: ProviderPageProps) {
