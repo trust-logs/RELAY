@@ -15,6 +15,7 @@ export async function saveProviderProfile(formData: FormData) {
 
   const userId = String(claimsData.claims.sub);
   const providerKind = String(formData.get("provider_kind") ?? "individual");
+  const acceptingWork = formData.get("accepting_work") === "true";
   const headline = String(formData.get("headline") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const serviceArea = String(formData.get("service_area_label") ?? "").trim();
@@ -59,6 +60,7 @@ export async function saveProviderProfile(formData: FormData) {
     years_experience: experience,
     website_url: websiteUrl,
     service_categories: [...new Set(categories)],
+    accepting_work: acceptingWork,
   }, { onConflict: "user_id" });
 
   if (error) redirect("/dashboard/provider?error=save");
