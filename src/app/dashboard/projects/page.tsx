@@ -42,9 +42,9 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         const isOwner = project.created_by === userId;
         return <article className="project-list-card" key={project.id}>
           <div className="project-list-top"><span className="network-category">{isOwner ? "CUSTOMER PROJECT" : "PROVIDER ASSIGNMENT"}</span><span className="project-status-pill">{project.status.replaceAll("_"," ")}</span></div>
-          <h2>{project.title}</h2><p>{project.description}</p>
+          <h2><Link href={`/dashboard/projects/${project.id}`}>{project.title} ↗</Link></h2><p>{project.description}</p>
           <div className="project-list-bottom"><strong>{formatBudget(project.budget_amount_minor,project.currency)}</strong><span>{isOwner ? "Provider: " : "Customer: "}{otherMembers.map((m) => profileMap.get(m.user_id)?.display_name || "RELAY member").join(", ") || "Assigned RELAY member"}</span></div>
-          <small>Created {new Date(project.created_at).toLocaleDateString()}</small>
+          <small>Created {new Date(project.created_at).toLocaleDateString()} · <Link href={`/dashboard/projects/${project.id}`}>OPEN WORKSPACE ↗</Link></small>
         </article>;
       })}</div>}
     </section><footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>Make it happen, together.</span></footer>
