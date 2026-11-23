@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
-import { publishRequest, unpublishRequest } from "@/app/actions/request-marketplace";
+import { publishRequest, unpublishRequest, acceptProposal } from "@/app/actions/request-marketplace";
 
 type RequestsPageProps = { searchParams: Promise<{ created?: string; published?: string; unpublished?: string; error?: string }> };
 
@@ -65,12 +65,12 @@ export default async function RequestsPage({ searchParams }: RequestsPageProps) 
             {isPublished ? <form action={unpublishRequest}><input type="hidden" name="request_id" value={request.id}/><button className="listing-toggle" type="submit">Stop sharing</button></form> :
               request.status === "open" ? <form action={publishRequest}><input type="hidden" name="request_id" value={request.id}/><button className="request-share-button" type="submit">Share with providers ↗</button></form> : null}
           </div>
-          {isPublished ? <div className="request-proposals"><div className="request-proposals-heading"><strong>{requestProposals.length} {requestProposals.length === 1 ? "proposal" : "proposals"}</strong><span>Provider responses</span></div>
+          {isPublished || request.status === "matched" ? <div className="request-proposals"><div className="request-proposals-heading"><strong>{requestProposals.length} {requestProposals.length === 1 ? "proposal" : "proposals"}</strong><span>Provider responses</span></div>
             {!requestProposals.length ? <p className="request-no-proposals">Your request is live. Provider proposals will appear here.</p> :
               requestProposals.map((proposal) => {
                 const profile = profileMap.get(proposal.provider_user_id);
                 const provider = providerMap.get(proposal.provider_user_id);
-                return <div className="request-proposal-row" key={proposal.id}><div><strong>{profile?.display_name || "RELAY provider"} {provider?.verification_status === "verified" ? <span className="network-verified">✓ VERIFIED</span> : null}</strong><p>{proposal.message}</p><small>{proposal.estimated_duration || "Timing to be discussed"} · {new Date(proposal.created_at).toLocaleDateString()}</small></div><div className="request-proposal-price"><strong>{formatQuote(proposal.amount_minor,proposal.currency)}</strong><span>{proposal.status}</span></div></div>;
+                return <div className="request-proposal-row" key={proposal.id}><div><strong>{profile?.display_name || "RELAY provider"} {provider?.verification_status === "verified" ? <span className="network-verified">✓ VERIFIED</span> : null}</strong><p>{proposal.message}</p><small>{proposal.estimated_duration || "Timing to be discussed"} · {new Date(proposal.created_at).toLocaleDateString()}</small></div><div className="request-proposal-price"><strong>{formatQuote(proposal.amount_minor,proposal.currency)}</strong><span>{proposal.status}</span>{proposal.status === "pending" && request.status === "open" ? <form action={acceptProposal}><input type="hidden" name="proposal_id" value={proposal.id}/><button className="proposal-accept-button" type="submit">Accept proposal ↗</button></form> : null}</div></div>;
               })}
           </div> : <div className="request-private-note">Private to you. Share it with providers only when you're ready.</div>}
         </article>;
