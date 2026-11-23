@@ -68,7 +68,7 @@ export default async function TrustPage() {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  const latestByType = new Map<string, (typeof verifications extends (infer T)[] | null ? T : never)>();
+  const latestByType = new Map<string, { status: string; expires_at: string | null }>();
   for (const item of verifications ?? []) {
     if (!latestByType.has(item.check_type)) latestByType.set(item.check_type, item);
   }
