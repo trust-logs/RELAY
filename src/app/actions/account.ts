@@ -76,5 +76,5 @@ export async function requestEmailChange(formData: FormData) {
 export async function signOutEverywhere() {
   const { supabase } = await getUserClient();
   await supabase.auth.signOut({ scope: "global" });
-  redirect("/login? signedout=all");
+  redirect("/login?signedout=all");
 }
