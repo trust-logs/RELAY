@@ -9,13 +9,15 @@ type RequestsPageProps = { searchParams: Promise<{ created?: string; published?:
 function formatBudget(amount: number | null, currency: string | null) {
   if (amount === null || !currency) return "Budget not set";
   try {
-    const digits = new Intl.NumberFormat("en", { style:"currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
+    const resolvedDigits = new Intl.NumberFormat("en", { style:"currency", currency }).resolvedOptions().maximumFractionDigits;
+    const digits: number = typeof resolvedDigits === "number" ? resolvedDigits : 2;
     return new Intl.NumberFormat("en", { style:"currency", currency, maximumFractionDigits:digits }).format(amount / (10 ** digits));
   } catch { return `${currency} ${amount}`; }
 }
 function formatQuote(amount: number, currency: string) {
   try {
-    const digits = new Intl.NumberFormat("en", { style:"currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
+    const resolvedDigits = new Intl.NumberFormat("en", { style:"currency", currency }).resolvedOptions().maximumFractionDigits;
+    const digits: number = typeof resolvedDigits === "number" ? resolvedDigits : 2;
     return new Intl.NumberFormat("en", { style:"currency", currency, maximumFractionDigits:digits }).format(amount / (10 ** digits));
   } catch { return `${currency} ${amount}`; }
 }
