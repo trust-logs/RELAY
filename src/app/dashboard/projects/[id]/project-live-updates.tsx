@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type Message = { id:string; sender_id:string; body:string; message_type:string; created_at:string };
@@ -10,7 +10,7 @@ const MAX_FILE_SIZE=10*1024*1024;
 const ALLOWED_TYPES=["image/jpeg","image/png","image/webp","application/pdf"];
 
 export default function ProjectLiveUpdates({projectId,userId,initialMessages,initialAttachments,names}:Props) {
-  const supabase=useRef(createClient()).current;
+  const supabase=useMemo(()=>createClient(),[]);
   const [messages,setMessages]=useState(initialMessages);
   const [attachments,setAttachments]=useState(initialAttachments);
   const [body,setBody]=useState("");
