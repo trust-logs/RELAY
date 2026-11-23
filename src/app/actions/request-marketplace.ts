@@ -100,3 +100,21 @@ export async function submitProposal(formData: FormData) {
   revalidatePath("/dashboard/requests");
   redirect("/dashboard/provider/requests?sent=1");
 }
+
+export async function acceptProposal(formData: FormData) {
+  const supabase = await createClient();
+  const { data: claims, error } = await supabase.auth.getClaims();
+  if (error || !claims?.claims?.sub) redirect("/login");
+  const proposalId = String(formData.get("proposal_id") ?? "");
+  if (!validId(proposalId)) redirect("/dashboard/requests?error=accept");
+
+  const { data: projectId, error: acceptError } = await supabase.rpc("accept_proposal", {
+    p_proposal_id: proposalId,
+  });
+  if (acceptError || !projectId) redirect("/dashboard/requests?error=accept");
+
+  revalidatePath("/dashboard/requests");
+  revalidatePath("/dashboard/projects");
+  revalidatePath("/dashboard/provider/requests");
+  redirect("/dashboard/projects?created=1");
+}
