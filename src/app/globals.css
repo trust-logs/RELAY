@@ -501,3 +501,9 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
 .project-list-bottom strong { font: 800 12px Manrope; }
 .project-list-bottom span, .project-list-card > small { color: #96919e; font-size: 9px; }
 .proposal-accept-button { margin-top: 8px; padding: 8px 11px; border: 0; border-radius: 20px; background: var(--lime); color: var(--ink); font: 800 8px 'DM Sans'; cursor: pointer; }
+
+.provider-availability-option { display: flex; align-items: flex-start; gap: 12px; margin: 18px 0; padding: 16px; border: 1px solid #e6e1ed; border-radius: 12px; background: #faf9fd; cursor: pointer; }
+.provider-availability-option input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--violet); }
+.provider-availability-option span { display: grid; gap: 5px; }
+.provider-availability-option strong { color: var(--ink); font-size: 10px; }
+.provider-availability-option small { color: #817c89; font-size: 9px; line-height: 1.6; }
