@@ -449,3 +449,44 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
   .network-toolbar { gap: 12px; font-size: 8px; }
   .network-toolbar a { text-align: right; }
 }
+
+/* RELAY request sharing and proposal flow */
+.request-marketplace-card { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 15px 22px; }
+.request-share-button { margin-top: 8px; padding: 10px 13px; border: 0; border-radius: 30px; background: var(--violet); color: #fff; font: 700 9px 'DM Sans'; cursor: pointer; white-space: nowrap; }
+.request-private-note { grid-column: 1 / -1; padding-top: 12px; border-top: 1px solid #f0edf4; color: #96919e; font-size: 9px; }
+.request-proposals { grid-column: 1 / -1; padding-top: 15px; border-top: 1px solid #ece8f2; }
+.request-proposals-heading { display: flex; align-items: center; gap: 10px; }
+.request-proposals-heading strong { font: 800 12px Manrope; }
+.request-proposals-heading span { color: #96919e; font-size: 9px; }
+.request-no-proposals { color: #96919e; font-size: 10px; }
+.request-proposal-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 15px 0; border-bottom: 1px solid #f0edf4; }
+.request-proposal-row > div:first-child { min-width: 0; }
+.request-proposal-row > div:first-child > strong { font-size: 10px; }
+.request-proposal-row p { margin: 7px 0; color: #777381; font-size: 10px; line-height: 1.7; white-space: pre-wrap; }
+.request-proposal-row small { color: #96919e; font-size: 8px; }
+.request-proposal-price { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; white-space: nowrap; }
+.request-proposal-price strong { font: 800 12px Manrope; }
+.request-proposal-price span { color: #96919e; font-size: 8px; text-transform: capitalize; }
+.provider-request-stack { display: grid; gap: 14px; margin-top: 20px; }
+.provider-request-card { padding: 24px; border: 1px solid #eae6f0; border-radius: 16px; background: white; }
+.provider-request-top { display: flex; justify-content: space-between; gap: 12px; }
+.provider-request-date { color: #96919e; font-size: 8px; }
+.provider-request-card h2 { margin: 14px 0 8px; font: 800 20px Manrope; }
+.provider-request-card > p { margin: 0; color: #777381; font-size: 11px; line-height: 1.8; white-space: pre-wrap; }
+.provider-request-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 17px; padding: 13px 0; border-top: 1px solid #f0edf4; border-bottom: 1px solid #f0edf4; }
+.provider-request-meta strong { font: 800 12px Manrope; }
+.provider-request-meta span { color: #96919e; font-size: 8px; text-align: right; }
+.proposal-composer { margin-top: 15px; }
+.proposal-composer summary { color: var(--violet); font-size: 9px; font-weight: 800; cursor: pointer; }
+.proposal-composer form { display: grid; gap: 10px; margin-top: 15px; }
+.proposal-composer label { color: #625c6d; font-size: 9px; font-weight: 700; }
+.proposal-composer input, .proposal-composer textarea { width: 100%; padding: 12px 13px; border: 1px solid #e6e1ed; border-radius: 9px; background: #fff; color: var(--ink); font: 11px 'DM Sans'; }
+.proposal-composer textarea { resize: vertical; }
+.proposal-sent-state { margin-top: 15px; padding: 12px; border-radius: 9px; background: #f3f8ed; color: #557d35; font-size: 9px; font-weight: 700; }
+@media (max-width: 760px) {
+  .request-marketplace-card { grid-template-columns: 1fr; }
+  .request-proposal-row { flex-direction: column; }
+  .request-proposal-price { align-items: flex-start; }
+  .provider-request-meta { flex-direction: column; }
+  .provider-request-meta span { text-align: left; }
+}
