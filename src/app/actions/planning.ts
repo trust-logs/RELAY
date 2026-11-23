@@ -94,8 +94,8 @@ export async function saveProjectPlan(formData: FormData) {
   const summary=String(formData.get("summary")??"").trim();
   let steps:PlanStep[];
   try { steps=JSON.parse(String(formData.get("steps")??"[]")) as PlanStep[]; } catch { redirect(path(projectId)); }
-  if(!uuid.test(projectId)||!uuid.test(planId)||title.length<2||title.length>180||summary.length>2000||steps.length<2||steps.length>20) redirect(path(projectId));
-  const valid=steps.every(s=>s && (s.kind==="task"||s.kind==="milestone") && typeof s.title==="string" && s.title.trim().length>=2 && s.title.length<=180 && typeof s.description==="string" && s.description.length<=2000);
+  if(!uuid.test(projectId)||!uuid.test(planId)||title.length<2||title.length>180||summary.length>2000||!Array.isArray(steps)||steps.length<2||steps.length>20) redirect(path(projectId));
+  const valid=steps.every(s=>s && typeof s.id==="string" && s.id.length<=80 && (s.kind==="task"||s.kind==="milestone") && typeof s.title==="string" && s.title.trim().length>=2 && s.title.length<=180 && typeof s.description==="string" && s.description.length<=2000);
   if(!valid||!steps.some(s=>s.kind==="task")||!steps.some(s=>s.kind==="milestone")) redirect(`${path(projectId)}?plan_error=invalid`);
   const {data:project}=await supabase.from("projects").select("id,created_by").eq("id",projectId).maybeSingle();
   if(!project||project.created_by!==userId) redirect("/dashboard/projects");
