@@ -10,7 +10,7 @@ type RequestsPageProps = {
 function formatBudget(amount: number | null, currency: string | null) {
   if (amount === null || !currency) return "Budget not set";
   try {
-    const digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+    const digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
     return new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: digits }).format(amount / 10 ** digits);
   } catch {
     return `${currency} ${amount}`;
