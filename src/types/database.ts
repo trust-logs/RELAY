@@ -347,9 +347,9 @@ export type Database = {
         ]
       }
       request_publications: {
-        Row: { request_id: string; title: string; description: string; category: string | null; budget_amount_minor: number | null; currency: string | null; published_at: string }
-        Insert: { request_id: string; title: string; description: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; published_at?: string }
-        Update: { request_id?: string; title?: string; description?: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; published_at?: string }
+        Row: { request_id: string; title: string; description: string; category: string | null; budget_amount_minor: number | null; currency: string | null; desired_at: string | null; published_at: string }
+        Insert: { request_id: string; title: string; description: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; desired_at?: string | null; published_at?: string }
+        Update: { request_id?: string; title?: string; description?: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; desired_at?: string | null; published_at?: string }
         Relationships: [{ foreignKeyName: "request_publications_request_id_fkey"; columns: ["request_id"]; isOneToOne: true; referencedRelation: "requests"; referencedColumns: ["id"] }]
       }
       proposals: {
