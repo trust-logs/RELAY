@@ -359,6 +359,15 @@ export type Database = {
           { foreignKeyName: "project_messages_sender_id_fkey"; columns: ["sender_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }
         ]
       }
+      project_attachments: {
+        Row: { id: string; project_id: string; uploaded_by: string; file_name: string; object_path: string; mime_type: string; file_size: number; created_at: string }
+        Insert: { id?: string; project_id: string; uploaded_by: string; file_name: string; object_path: string; mime_type: string; file_size: number; created_at?: string }
+        Update: { id?: string; project_id?: string; uploaded_by?: string; file_name?: string; object_path?: string; mime_type?: string; file_size?: number; created_at?: string }
+        Relationships: [
+          { foreignKeyName: "project_attachments_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_attachments_uploaded_by_fkey"; columns: ["uploaded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }
+        ]
+      }
       service_listings: {
         Row: { category: string; created_at: string; currency: string; description: string; id: string; is_active: boolean; price_amount_minor: number | null; pricing_model: string; provider_user_id: string; title: string; updated_at: string }
         Insert: { category: string; created_at?: string; currency?: string; description: string; id?: string; is_active?: boolean; price_amount_minor?: number | null; pricing_model?: string; provider_user_id: string; title: string; updated_at?: string }
