@@ -50,7 +50,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       {query.plan === "saved" ? <div className="request-success">✓ Your plan changes have been saved.</div> : null}
       {query.plan === "approved" ? <div className="request-success">✓ Plan approved. Tasks and milestones have been added to this project.</div> : null}
       {query.plan_error ? <div className="auth-alert">The plan could not be processed. Check the plan and try again.</div> : null}
-      {isOwner ? <ProjectPlanBuilder projectId={id} plan={plan as any} isOwner={isOwner}/> : null}
+      {isOwner || plan?.status === "approved" ? <ProjectPlanBuilder projectId={id} plan={plan as any} isOwner={isOwner}/> : null}
       <div className="workspace-summary"><div><strong>{doneTasks}/{tasks?.length ?? 0}</strong><span>TASKS COMPLETE</span></div><div><strong>{doneMilestones}/{milestones?.length ?? 0}</strong><span>MILESTONES HIT</span></div><div><strong>{money(project.budget_amount_minor,project.currency)}</strong><span>AGREED QUOTE</span></div></div>
       <div className="workspace-grid">
         <section className="workspace-panel">
