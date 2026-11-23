@@ -329,6 +329,12 @@ export type Database = {
           },
         ]
       }
+      service_listings: {
+        Row: { category: string; created_at: string; currency: string; description: string; id: string; is_active: boolean; price_amount_minor: number | null; pricing_model: string; provider_user_id: string; title: string; updated_at: string }
+        Insert: { category: string; created_at?: string; currency?: string; description: string; id?: string; is_active?: boolean; price_amount_minor?: number | null; pricing_model?: string; provider_user_id: string; title: string; updated_at?: string }
+        Update: { category?: string; created_at?: string; currency?: string; description?: string; id?: string; is_active?: boolean; price_amount_minor?: number | null; pricing_model?: string; provider_user_id?: string; title?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "service_listings_provider_user_id_fkey"; columns: ["provider_user_id"]; isOneToOne: false; referencedRelation: "provider_profiles"; referencedColumns: ["user_id"] }]
+      }
       trust_verifications: {
         Row: {
           check_type: string
