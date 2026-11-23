@@ -746,3 +746,16 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
 .customer-provider-fit span { color:#898391; font-size:8px; line-height:1.5; }
 .network-count small { display:block; margin-top:5px; color:#96919e; font-size:7px; }
 @media(max-width:600px) { .provider-match-reasons { gap:5px; } .provider-match-reasons span { font-size:6.5px; } }
+
+
+/* RELAY Smart Scheduling */
+.provider-schedule-form { display:grid; gap:12px; margin:20px 0 32px; padding:22px; border:1px solid #e9e4f1; border-radius:16px; background:#fff; }
+.provider-schedule-form > label { color:var(--ink); font-size:10px; font-weight:800; }
+.provider-schedule-form > input { width:100%; min-height:44px; padding:0 12px; border:1px solid #e6e1eb; border-radius:9px; background:#fff; color:var(--ink); font:inherit; font-size:12px; }
+.provider-week-grid { display:grid; gap:8px; margin-top:8px; }
+.provider-week-row { display:grid; grid-template-columns:minmax(100px,1fr) minmax(100px,.7fr) minmax(100px,.7fr); align-items:center; gap:10px; padding:10px 12px; border:1px solid #efedf2; border-radius:10px; }
+.provider-week-day { display:flex; align-items:center; gap:8px; color:var(--ink); font-size:10px; }
+.provider-week-day input { accent-color:var(--violet); }
+.provider-week-row > label:not(.provider-week-day) { display:grid; gap:4px; color:#918b99; font-size:8px; font-weight:800; }
+.provider-week-row input[type="time"] { width:100%; min-width:0; padding:7px 5px; border:1px solid #e9e5ed; border-radius:7px; color:var(--ink); background:#fff; font:inherit; font-size:10px; }
+@media(max-width:520px) { .provider-schedule-form { padding:13px; } .provider-week-row { grid-template-columns:1fr 1fr; } .provider-week-day { grid-column:1/-1; } }
