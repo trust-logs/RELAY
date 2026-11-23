@@ -31,7 +31,7 @@ export async function createServiceListing(formData: FormData) {
     const amount = Number(priceRaw);
     if (!Number.isFinite(amount) || amount <= 0) redirect("/dashboard/provider/listings/new?error=price");
     try {
-      const digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+      const digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
       priceAmountMinor = Math.round(amount * (10 ** digits));
     } catch {
       redirect("/dashboard/provider/listings/new?error=currency");
