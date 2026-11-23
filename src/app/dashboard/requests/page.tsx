@@ -27,7 +27,7 @@ export default async function RequestsPage({ searchParams }: RequestsPageProps) 
   const userId = String(claims.claims.sub);
   const params = await searchParams;
   const { data: requests, error: requestsError } = await supabase.from("requests")
-    .select("id,title,description,category,status,budget_amount_minor,currency,location_label,created_at")
+    .select("id,title,description,category,status,budget_amount_minor,currency,location_label,desired_at,created_at")
     .eq("created_by", userId).order("created_at", { ascending:false });
   const requestIds = (requests ?? []).map((r) => r.id);
   const [{ data: publications }, { data: proposals }] = requestIds.length ? await Promise.all([
@@ -60,7 +60,7 @@ export default async function RequestsPage({ searchParams }: RequestsPageProps) 
         const isPublished = publishedSet.has(request.id);
         const requestProposals = proposalsByRequest.get(request.id) ?? [];
         return <article className="request-list-card request-marketplace-card" key={request.id}>
-          <div className="request-list-main"><span className="dashboard-label">{(request.category || "GENERAL").replaceAll("_"," ").toUpperCase()}</span><h2>{request.title}</h2><p>{request.description || "No extra details provided."}</p><small>{request.location_label || "Location not set"} · {new Date(request.created_at).toLocaleDateString()}</small></div>
+          <div className="request-list-main"><span className="dashboard-label">{(request.category || "GENERAL").replaceAll("_"," ").toUpperCase()}</span><h2>{request.title}</h2><p>{request.description || "No extra details provided."}</p><small>{request.location_label || "Location not set"} · {new Date(request.created_at).toLocaleDateString()}{request.desired_at ? ` · Needed by ${new Date(request.desired_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}` : ""}</small></div>
           <div className="request-list-meta"><span className="request-list-status">{isPublished ? "shared with network" : request.status.replaceAll("_"," ")}</span><strong>{formatBudget(request.budget_amount_minor,request.currency)}</strong>
             {isPublished ? <form action={unpublishRequest}><input type="hidden" name="request_id" value={request.id}/><button className="listing-toggle" type="submit">Stop sharing</button></form> :
               request.status === "open" ? <form action={publishRequest}><input type="hidden" name="request_id" value={request.id}/><button className="request-share-button" type="submit">Share with providers ↗</button></form> : null}
