@@ -7,6 +7,28 @@ import { submitProposal } from "@/app/actions/request-marketplace";
 type Props = { searchParams: Promise<{ error?: string; sent?: string }> };
 const categoryNames: Record<string,string> = { errands:"Errands & pickups",home:"Home assistance",office:"Office assistance",property:"Property inspection",field:"Business field tasks",professional:"Professional services",other:"Other" };
 
+type ProviderMatchProfile = {
+  accepting_work: boolean;
+  service_categories: string[] | null;
+  years_experience: number | null;
+  verification_status: string | null;
+};
+
+function scoreRequestMatch(category: string | null, provider: ProviderMatchProfile) {
+  const serviceMatch = Boolean(category && provider.service_categories?.includes(category));
+  const experiencePoints = Math.min(Math.max(provider.years_experience ?? 0, 0), 10) * 2;
+  const verifiedPoints = provider.verification_status === "verified" ? 20 : 0;
+  const availabilityPoints = provider.accepting_work ? 10 : 0;
+  const score = (serviceMatch ? 50 : 0) + experiencePoints + verifiedPoints + availabilityPoints;
+  const reasons = [
+    serviceMatch ? "Your listed service matches" : "Outside your selected service categories",
+    provider.years_experience !== null ? `${provider.years_experience} years' experience` : "Add experience to improve matching",
+    provider.verification_status === "verified" ? "Identity/provider checks verified" : "Verification can strengthen customer confidence",
+    provider.accepting_work ? "Currently accepting work" : "Availability is switched off",
+  ];
+  return { score, serviceMatch, reasons };
+}
+
 function formatBudget(amount: number | null, currency: string | null) {
   if (amount === null || !currency) return "Customer budget not set";
   try {
@@ -22,11 +44,21 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
   const userId = String(claims.claims.sub);
   const params = await searchParams;
   const [{ data: provider }, { data: requests }] = await Promise.all([
-    supabase.from("provider_profiles").select("accepting_work").eq("user_id", userId).maybeSingle(),
+    supabase.from("provider_profiles").select("accepting_work,service_categories,years_experience,verification_status").eq("user_id", userId).maybeSingle(),
     supabase.from("request_publications").select("request_id,title,description,category,budget_amount_minor,currency,desired_at,published_at").order("published_at", { ascending:false }).limit(60),
   ]);
   const { data: myProposals } = await supabase.from("proposals").select("request_id,status").eq("provider_user_id", userId);
   const proposalMap = new Map((myProposals ?? []).map((p) => [p.request_id,p.status]));
+  const matchProfile: ProviderMatchProfile = {
+    accepting_work: Boolean(provider?.accepting_work),
+    service_categories: provider?.service_categories ?? [],
+    years_experience: provider?.years_experience ?? null,
+    verification_status: provider?.verification_status ?? null,
+  };
+  const rankedRequests = (requests ?? []).map((request) => ({
+    request,
+    match: scoreRequestMatch(request.category, matchProfile),
+  })).sort((a, b) => b.match.score - a.match.score || new Date(b.request.published_at).getTime() - new Date(a.request.published_at).getTime());
   const errors: Record<string,string> = {
     details:"Check your proposal details and try again.", amount:"Enter a valid amount greater than zero.",
     closed:"This request is no longer available.", currency:"Your quote must use the customer's requested currency.",
@@ -37,15 +69,18 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
     <nav className="nav dashboard-nav"><Link className="brand" href="/"><span className="brand-mark">R</span><span>RELAY<span className="brand-period">.</span></span></Link><div className="trust-nav-actions"><Link className="signout-button trust-back-link" href="/dashboard/provider">← Provider profile</Link><form action={signOut}><button className="signout-button" type="submit">Sign out ↗</button></form></div></nav>
     <section className="network-page">
       <div className="auth-kicker"><span className="live-dot" /> RELAY NETWORK · OPEN REQUESTS</div>
-      <div className="network-heading"><div><h1>Good work<br /><span>starts here.</span></h1><p>Browse customer requests shared with RELAY NETWORK. Exact addresses and private contact details are not shown in this feed.</p></div><div className="network-count"><strong>{requests?.length ?? 0}</strong><span>OPEN REQUESTS</span></div></div>
+      <div className="network-heading"><div><h1>Good work<br /><span>starts here.</span></h1><p>Browse customer requests shared with RELAY NETWORK. Exact addresses and private contact details are not shown in this feed.</p></div><div className="network-count"><strong>{requests?.length ?? 0}</strong><span>OPEN REQUESTS</span><small>Ranked for your profile</small></div></div>
       {params.sent === "1" ? <div className="request-success">✓ Your proposal has been sent to the customer.</div> : null}
       {params.error && errors[params.error] ? <div className="auth-alert">{errors[params.error]}</div> : null}
       {!provider?.accepting_work ? <div className="network-empty"><span>✳</span><h2>Switch on your availability.</h2><p>Your provider profile must be set to accepting work before you can browse requests or send proposals.</p><Link href="/dashboard/provider">UPDATE PROVIDER PROFILE ↗</Link></div> :
       !requests?.length ? <div className="network-empty"><span>✳</span><h2>No open requests just yet.</h2><p>When customers share requests with the network, they will appear here. Check back soon.</p><Link href="/dashboard/network">EXPLORE SERVICES ↗</Link></div> :
-      <div className="provider-request-stack">{requests.map((request) => {
+      <div className="provider-match-explainer"><strong>How RELAY ranks opportunities</strong><span>Service fit 50% · Experience up to 20% · Verification 20% · Availability 10%</span><small>Scores are guidance, not guarantees. Customers make the final hiring decision.</small></div>
+      <div className="provider-request-stack">{rankedRequests.map(({ request, match }) => {
         const existing = proposalMap.get(request.request_id);
         return <article className="provider-request-card" key={request.request_id}>
           <div className="provider-request-top"><span className="network-category">{categoryNames[request.category ?? "other"] ?? "Other"}</span><span className="provider-request-date">Shared {new Date(request.published_at).toLocaleDateString()}</span></div>
+          <div className="provider-match-score"><strong>{match.score}%</strong><span>PROFILE MATCH</span></div>
+          <div className="provider-match-reasons">{match.reasons.map((reason) => <span className={reason.startsWith("Outside") || reason.startsWith("Verification can") || reason.startsWith("Add") ? "is-neutral" : "is-match"} key={reason}>{reason}</span>)}</div>
           <h2>{request.title}</h2><p>{request.description}</p>
           <div className="provider-request-meta"><strong>{formatBudget(request.budget_amount_minor,request.currency)}</strong><span>{request.desired_at ? `Target: ${new Date(request.desired_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}` : "Timing to be agreed"} · Location details shared after selection</span></div>
           {existing ? <div className="proposal-sent-state">✓ Proposal already sent · {existing.replaceAll("_"," ")}</div> :
