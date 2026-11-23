@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
 import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus } from "@/app/actions/project-execution";
 import ProjectLiveUpdates from "./project-live-updates";
+import ProjectPlanBuilder from "./plan-builder";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> };
 const taskLabels: Record<string,string> = { todo:"To do", in_progress:"In progress", blocked:"Blocked", completed:"Completed", cancelled:"Cancelled" };
@@ -20,15 +21,16 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const { data: claims, error: authError } = await supabase.auth.getClaims();
   if (authError || !claims?.claims?.sub) redirect("/login");
   const userId = String(claims.claims.sub);
-  const { data: project } = await supabase.from("projects").select("id,title,description,status,budget_amount_minor,currency,created_by,created_at,due_at").eq("id",id).maybeSingle();
+  const { data: project } = await supabase.from("projects").select("id,title,description,status,budget_amount_minor,currency,created_by,created_at,due_at,request_id").eq("id",id).maybeSingle();
   if (!project) notFound();
   const isOwner = project.created_by === userId;
-  const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}, {data: attachments}] = await Promise.all([
+  const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}, {data: attachments}, {data: plan}] = await Promise.all([
     supabase.from("tasks").select("id,title,description,status,assigned_to,due_at,completed_at,created_at").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_milestones").select("id,title,description,status,due_at,completed_at,sort_order").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_messages").select("id,sender_id,body,message_type,created_at").eq("project_id",id).order("created_at").limit(100),
     supabase.from("project_members").select("user_id,member_role").eq("project_id",id),
     supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at").eq("project_id",id).order("created_at",{ascending:false}),
+    supabase.from("request_plans").select("id,title,summary,source,status,steps").eq("project_id",id).maybeSingle(),
   ]);
   const ids = [...new Set([...(members ?? []).map(m=>m.user_id),...(messages ?? []).map(m=>m.sender_id),...(attachments ?? []).map(a=>a.uploaded_by)])];
   const {data: profiles} = ids.length ? await supabase.from("profiles").select("id,display_name").in("id",ids) : {data:[]};
@@ -44,6 +46,11 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       {query.error ? <div className="auth-alert">That update couldn't be saved. Please check the details and try again.</div> : null}
       {query.task === "created" ? <div className="request-success">✓ Task added to the project.</div> : null}
       {query.milestone === "created" ? <div className="request-success">✓ Milestone added.</div> : null}
+      {query.plan === "generated" ? <div className="request-success">✓ RELAY has drafted an execution plan. Review it before approval.</div> : null}
+      {query.plan === "saved" ? <div className="request-success">✓ Your plan changes have been saved.</div> : null}
+      {query.plan === "approved" ? <div className="request-success">✓ Plan approved. Tasks and milestones have been added to this project.</div> : null}
+      {query.plan_error ? <div className="auth-alert">The plan could not be processed. Check the plan and try again.</div> : null}
+      {isOwner ? <ProjectPlanBuilder projectId={id} plan={plan as any} isOwner={isOwner}/> : null}
       <div className="workspace-summary"><div><strong>{doneTasks}/{tasks?.length ?? 0}</strong><span>TASKS COMPLETE</span></div><div><strong>{doneMilestones}/{milestones?.length ?? 0}</strong><span>MILESTONES HIT</span></div><div><strong>{money(project.budget_amount_minor,project.currency)}</strong><span>AGREED QUOTE</span></div></div>
       <div className="workspace-grid">
         <section className="workspace-panel">
