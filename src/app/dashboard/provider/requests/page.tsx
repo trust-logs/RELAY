@@ -92,7 +92,7 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
             <button className="auth-submit" type="submit">Send proposal <span>↗</span></button>
           </form></details>}
         </article>;
-      })}</div>}
+      })}</div></>}
       <p className="network-footnote">Only send proposals for work you can deliver. Sending a proposal does not create a contract or authorise payment.</p>
     </section><footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>Earn trust through clear commitments.</span></footer>
   </main>;
