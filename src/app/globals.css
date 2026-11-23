@@ -683,3 +683,12 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
  .settings-footnote { grid-column:auto; }
 }
 @media(max-width:420px) { .settings-form-row { grid-template-columns:1fr; } }
+
+
+/* RELAY request scheduling */
+.request-schedule-field { display:grid; gap:7px; margin:2px 0 4px; }
+.request-schedule-field label { color:#4f4a59; font-size:9px; font-weight:800; }
+.request-schedule-field label span { color:#96919e; font-weight:500; }
+.request-schedule-field input[type="datetime-local"] { width:100%; padding:12px 13px; border:1px solid #e6e1ed; border-radius:9px; background:#fff; color:var(--ink); font:11px 'DM Sans'; }
+.request-schedule-field small { color:#96919e; font-size:8px; line-height:1.6; }
+.provider-request-meta span { line-height:1.6; }
