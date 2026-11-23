@@ -36,7 +36,7 @@ export default async function DashboardPage() {
         <article className="dashboard-card"><span className="dashboard-card-icon lime-icon">⌂</span><span className="dashboard-label">YOUR ACCOUNT</span><h2>Personal profile</h2><p>Your profile was created automatically when you registered.</p><span className="dashboard-detail">Account type: {profile?.account_type ?? "personal"}</span></article>
         <article className="dashboard-card"><span className="dashboard-card-icon dark-icon">✓</span><span className="dashboard-label">RELAY TRUST</span><h2>Trust starts here.</h2><p>See your verification checks, understand each badge and manage your trust status.</p><Link className="dashboard-detail dashboard-trust-link" href="/dashboard/trust">OPEN VERIFICATION CENTRE ↗</Link></article>
       </section>
-      <footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>You're signed in securely.</span></footer>
+      <section className="provider-dashboard-cta"><div><span className="dashboard-label">RELAY NETWORK</span><h2>Have a skill or service to offer?</h2><p>Create your provider profile and get ready to receive relevant customer requests.</p></div><Link href="/dashboard/provider">SET UP PROVIDER PROFILE ↗</Link></section><footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>You're signed in securely.</span></footer>
     </main>
   );
 }
