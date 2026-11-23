@@ -329,6 +329,21 @@ export type Database = {
           },
         ]
       }
+      request_publications: {
+        Row: { request_id: string; title: string; description: string; category: string | null; budget_amount_minor: number | null; currency: string | null; published_at: string }
+        Insert: { request_id: string; title: string; description: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; published_at?: string }
+        Update: { request_id?: string; title?: string; description?: string; category?: string | null; budget_amount_minor?: number | null; currency?: string | null; published_at?: string }
+        Relationships: [{ foreignKeyName: "request_publications_request_id_fkey"; columns: ["request_id"]; isOneToOne: true; referencedRelation: "requests"; referencedColumns: ["id"] }]
+      }
+      proposals: {
+        Row: { id: string; request_id: string; provider_user_id: string; amount_minor: number; currency: string; message: string; estimated_duration: string | null; status: string; created_at: string; updated_at: string }
+        Insert: { id?: string; request_id: string; provider_user_id: string; amount_minor: number; currency: string; message: string; estimated_duration?: string | null; status?: string; created_at?: string; updated_at?: string }
+        Update: { id?: string; request_id?: string; provider_user_id?: string; amount_minor?: number; currency?: string; message?: string; estimated_duration?: string | null; status?: string; created_at?: string; updated_at?: string }
+        Relationships: [
+          { foreignKeyName: "proposals_request_id_fkey"; columns: ["request_id"]; isOneToOne: false; referencedRelation: "requests"; referencedColumns: ["id"] },
+          { foreignKeyName: "proposals_provider_user_id_fkey"; columns: ["provider_user_id"]; isOneToOne: false; referencedRelation: "provider_profiles"; referencedColumns: ["user_id"] }
+        ]
+      }
       service_listings: {
         Row: { category: string; created_at: string; currency: string; description: string; id: string; is_active: boolean; price_amount_minor: number | null; pricing_model: string; provider_user_id: string; title: string; updated_at: string }
         Insert: { category: string; created_at?: string; currency?: string; description: string; id?: string; is_active?: boolean; price_amount_minor?: number | null; pricing_model?: string; provider_user_id: string; title: string; updated_at?: string }
