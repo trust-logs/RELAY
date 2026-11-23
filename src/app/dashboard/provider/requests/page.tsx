@@ -23,7 +23,7 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
   const params = await searchParams;
   const [{ data: provider }, { data: requests }] = await Promise.all([
     supabase.from("provider_profiles").select("accepting_work").eq("user_id", userId).maybeSingle(),
-    supabase.from("request_publications").select("request_id,title,description,category,budget_amount_minor,currency,published_at").order("published_at", { ascending:false }).limit(60),
+    supabase.from("request_publications").select("request_id,title,description,category,budget_amount_minor,currency,desired_at,published_at").order("published_at", { ascending:false }).limit(60),
   ]);
   const { data: myProposals } = await supabase.from("proposals").select("request_id,status").eq("provider_user_id", userId);
   const proposalMap = new Map((myProposals ?? []).map((p) => [p.request_id,p.status]));
@@ -47,7 +47,7 @@ export default async function ProviderRequestsPage({ searchParams }: Props) {
         return <article className="provider-request-card" key={request.request_id}>
           <div className="provider-request-top"><span className="network-category">{categoryNames[request.category ?? "other"] ?? "Other"}</span><span className="provider-request-date">Shared {new Date(request.published_at).toLocaleDateString()}</span></div>
           <h2>{request.title}</h2><p>{request.description}</p>
-          <div className="provider-request-meta"><strong>{formatBudget(request.budget_amount_minor,request.currency)}</strong><span>Location details shared by customer after selection</span></div>
+          <div className="provider-request-meta"><strong>{formatBudget(request.budget_amount_minor,request.currency)}</strong><span>{request.desired_at ? `Target: ${new Date(request.desired_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}` : "Timing to be agreed"} · Location details shared after selection</span></div>
           {existing ? <div className="proposal-sent-state">✓ Proposal already sent · {existing.replaceAll("_"," ")}</div> :
           <details className="proposal-composer"><summary>Send a proposal ↗</summary><form action={submitProposal}>
             <input type="hidden" name="request_id" value={request.request_id}/>
