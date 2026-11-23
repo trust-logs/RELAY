@@ -28,6 +28,11 @@ Never commit `.env.local`, service-role keys, or Supabase secret keys. Only the 
 
 ## Current implementation
 
+- Email/password registration and login with Supabase Auth.
+- Email confirmation callback and confirmation instructions screen.
+- Protected dashboard with server-validated claims and sign-out.
+- Automatic profile creation from a database trigger when an auth user is created.
+
 - RELAY marketing/entry experience and responsive brand styling.
 - Supabase browser and server clients using cookie-based SSR.
 - Supabase session-refresh proxy using `getClaims()`.
