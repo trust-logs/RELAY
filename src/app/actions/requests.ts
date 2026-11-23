@@ -1,0 +1,63 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+
+export async function createRequest(formData: FormData) {
+  const supabase = await createClient();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+
+  if (claimsError || !claimsData?.claims?.sub) redirect("/login");
+
+  const createdBy = String(claimsData.claims.sub);
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const locationLabel = String(formData.get("location_label") ?? "").trim();
+  const budgetRaw = String(formData.get("budget") ?? "").trim();
+  const currencyRaw = String(formData.get("currency") ?? "NGN").trim().toUpperCase();
+
+  if (title.length < 3 || title.length > 160 || description.length > 5000) {
+    redirect("/dashboard/requests/new?error=invalid");
+  }
+
+  let budgetAmountMinor: number | null = null;
+  let currency: string | null = null;
+
+  if (budgetRaw) {
+    const amount = Number(budgetRaw);
+    if (!Number.isFinite(amount) || amount < 0 || !/^[A-Z]{3}$/.test(currencyRaw)) {
+      redirect("/dashboard/requests/new?error=budget");
+    }
+
+    try {
+      const fractionDigits = new Intl.NumberFormat("en", {
+        style: "currency",
+        currency: currencyRaw,
+      }).resolvedOptions().maximumFractionDigits;
+      const multiplier = 10 ** fractionDigits;
+      budgetAmountMinor = Math.round(amount * multiplier);
+      currency = currencyRaw;
+    } catch {
+      redirect("/dashboard/requests/new?error=currency");
+    }
+  }
+
+  const { error } = await supabase.from("requests").insert({
+    created_by: createdBy,
+    title,
+    description,
+    category: category || null,
+    location_label: locationLabel || null,
+    budget_amount_minor: budgetAmountMinor,
+    currency,
+    status: "open",
+  });
+
+  if (error) redirect("/dashboard/requests/new?error=save");
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/requests");
+  redirect("/dashboard/requests?created=1");
+}
