@@ -97,31 +97,3 @@ export async function saveProviderAvailability(formData: FormData) {
   revalidatePath("/dashboard/provider/requests");
   redirect("/dashboard/provider?scheduleSaved=1");
 }
-
-
-export async function saveProviderAvailability(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-  if (claimsError || !claimsData?.claims?.sub) redirect("/login");
-  const timezone = String(formData.get("timezone") ?? "").trim();
-  const windows = Array.from({ length: 7 }, (_, day) => {
-    const enabled = formData.get("availability_enabled_" + day) === "true";
-    if (!enabled) return null;
-    return {
-      day_of_week: day,
-      start_time: String(formData.get("availability_start_" + day) ?? ""),
-      end_time: String(formData.get("availability_end_" + day) ?? ""),
-    };
-  }).filter((item): item is { day_of_week: number; start_time: string; end_time: string } => item !== null);
-  if (!timezone || windows.some((window) => !/^([01]\d|2[0-3]):[0-5]\d$/.test(window.start_time) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(window.end_time) || window.end_time <= window.start_time)) {
-    redirect("/dashboard/provider?error=schedule");
-  }
-  const { error } = await supabase.rpc("save_provider_availability", {
-    p_timezone: timezone,
-    p_windows: windows,
-  });
-  if (error) redirect("/dashboard/provider?error=schedule");
-  revalidatePath("/dashboard/provider");
-  revalidatePath("/dashboard/provider/requests");
-  redirect("/dashboard/provider?scheduleSaved=1");
-}
