@@ -22,7 +22,7 @@ export async function publishRequest(formData: FormData) {
   if (!validId(requestId)) redirect("/dashboard/requests");
 
   const { data: request } = await supabase.from("requests")
-    .select("id,title,description,category,status,budget_amount_minor,currency")
+    .select("id,title,description,category,status,budget_amount_minor,currency,desired_at")
     .eq("id", requestId).eq("created_by", userId).maybeSingle();
   if (!request || request.status !== "open") redirect("/dashboard/requests?error=publish");
 
