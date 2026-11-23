@@ -44,7 +44,7 @@ export default async function RequestsPage({ searchParams }: RequestsPageProps) 
   const providerMap = new Map((providerProfiles ?? []).map((p) => [p.user_id,p]));
   const proposalsByRequest = new Map<string, typeof proposals>();
   for (const proposal of proposals ?? []) proposalsByRequest.set(proposal.request_id,[...(proposalsByRequest.get(proposal.request_id) ?? []),proposal]);
-  const errors: Record<string,string> = { publish:"We couldn't share that request. Check that it is still open and try again.", unpublish:"We couldn't remove that request from the network. Please try again." };
+  const errors: Record<string,string> = { publish:"We couldn't share that request. Check that it is still open and try again.", unpublish:"We couldn't remove that request from the network. Please try again.", accept:"We couldn't accept that proposal. It may no longer be available." };
 
   return <main className="dashboard-shell">
     <nav className="nav dashboard-nav"><Link className="brand" href="/"><span className="brand-mark">R</span><span>RELAY<span className="brand-period">.</span></span></Link><div className="trust-nav-actions"><Link className="signout-button trust-back-link" href="/dashboard">← Dashboard</Link><form action={signOut}><button className="signout-button" type="submit">Sign out ↗</button></form></div></nav>
