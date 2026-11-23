@@ -21,11 +21,32 @@ RELAY is a global platform that helps people and businesses turn requests into c
 
 1. Install Node.js 22 or newer.
 2. Install dependencies with `npm install`.
-3. Copy `.env.example` to `.env.local` and add the Supabase project URL and publishable key.
+3. Copy `.env.example` to `.env.local`.
 4. Start the development server with `npm run dev`.
 
 Never commit `.env.local`, service-role keys, or Supabase secret keys. Only the publishable key belongs in `NEXT_PUBLIC_` variables.
 
-## Status
+## Current implementation
 
-Initial application foundation. Authentication, database schema, RLS policies, and product workflows are being implemented incrementally.
+- RELAY marketing/entry experience and responsive brand styling.
+- Supabase browser and server clients using cookie-based SSR.
+- Supabase session-refresh proxy using `getClaims()`.
+- Initial PostgreSQL foundation: profiles, provider profiles, requests, projects, project members, tasks, and trust verification records.
+- Row Level Security enabled on every initial public table.
+- Generated database TypeScript types in `src/types/database.ts`.
+
+## Database project
+
+- Organization: `LOGS_VAULT`
+- Project: `relay`
+- Region: `eu-west-1`
+- Project ref: `kgtjgzulxfhurjabplpc`
+
+The database bootstrap has been applied directly to the hosted project. We will add reproducible CLI migrations to this repository as the local development environment is set up.
+
+## Security
+
+- RLS is enabled on all application tables.
+- Verification status is not editable by normal users.
+- Never expose a Supabase service-role or secret key to browser code.
+- Identity and professional verification are separate trust checks.
