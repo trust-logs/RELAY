@@ -74,7 +74,7 @@ export default async function RequestPlanPage({ params, searchParams }: Props) {
           </aside>
         </div>
         <div className="ai-plan-guidance-grid"><section className="ai-plan-guidance"><span className="dashboard-label">BUDGET GUIDANCE</span><p>{plan.budget_guidance}</p></section><section className="ai-plan-guidance"><span className="dashboard-label">TIMING GUIDANCE</span><p>{plan.timeline_guidance}</p></section></div>
-        <div className="ai-plan-footer"><div><strong>{plan.status === "approved" ? "Your plan is approved." : "Ready to approve this plan?"}</strong><p>Approval only confirms this plan. Choosing a provider, accepting a quote, scheduling paid work and making payments remain separate decisions.</p></div>
+        <div className="ai-plan-footer"><div><strong>{plan.status === "approved" ? "Your plan is approved." : "Ready to approve this plan?"}</strong><p>Approval saves your execution instructions. Once you accept a provider proposal, RELAY turns the approved steps into project tasks and milestones. Choosing a provider, accepting a quote, scheduling paid work and making payments remain separate decisions.</p></div>
           <div className="ai-plan-actions">{plan.status === "draft" ? <form action={approveRequestExecutionPlan}><input type="hidden" name="request_id" value={request.id}/><button className="auth-submit" type="submit">Approve plan <span>✓</span></button></form> : null}<form action={generateRequestExecutionPlan}><input type="hidden" name="request_id" value={request.id}/><button className="listing-toggle" type="submit">Regenerate plan ↻</button></form></div>
         </div>
       </>}
