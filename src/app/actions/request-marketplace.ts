@@ -116,5 +116,5 @@ export async function acceptProposal(formData: FormData) {
   revalidatePath("/dashboard/requests");
   revalidatePath("/dashboard/projects");
   revalidatePath("/dashboard/provider/requests");
-  redirect("/dashboard/projects?created=1");
+  redirect(`/dashboard/projects/${projectId}`);
 }
