@@ -50,7 +50,7 @@ export async function createRequest(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.from("requests").insert({
+  const { data: createdRequest, error } = await supabase.from("requests").insert({
     created_by: createdBy,
     title,
     description,
@@ -60,11 +60,11 @@ export async function createRequest(formData: FormData) {
     currency,
     desired_at: desiredAt?.toISOString() ?? null,
     status: "open",
-  });
+  }).select("id").single();
 
-  if (error) redirect("/dashboard/requests/new?error=save");
+  if (error || !createdRequest) redirect("/dashboard/requests/new?error=save");
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/requests");
-  redirect("/dashboard/requests?created=1");
+  redirect(`/dashboard/requests/${createdRequest.id}/plan`);
 }
