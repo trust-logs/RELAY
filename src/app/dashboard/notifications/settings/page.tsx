@@ -5,6 +5,8 @@ import NotificationPreferences from "./preferences";
 const EVENT_TYPES = [
   "proposal_received","proposal_accepted","proposal_rejected",
   "project_message","task_updated","milestone_completed","evidence_uploaded",
+  "appointment_requested","appointment_confirmed","appointment_declined","appointment_cancelled",
+  "appointment_reminder","schedule_response_due","task_overdue","milestone_overdue",
 ] as const;
 
 export default async function NotificationSettingsPage() {
