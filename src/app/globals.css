@@ -866,3 +866,5 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
 .evidence-task-select { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0; color:#797382; font-size:10px; font-weight:800; }
 .evidence-task-select select { min-height:36px; max-width:100%; padding:7px 10px; border:1px solid #e8e3ed; border-radius:8px; background:white; color:var(--ink); font:inherit; font-size:10px; }
 @media(max-width:650px) { .progress-signal-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+.signal-evidence { background:#f0edff; color:#7651c8; }
