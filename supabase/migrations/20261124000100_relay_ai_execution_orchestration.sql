@@ -165,3 +165,31 @@ create trigger trg_attach_approved_request_plan_to_project
   for each row execute function private.attach_approved_request_plan_to_project();
 revoke all on function private.attach_approved_request_plan_to_project() from public, anon;
 grant execute on function private.attach_approved_request_plan_to_project() to authenticated;
+
+
+-- Create the owner membership through a narrow, authenticated trigger.
+-- The old invoker trigger attempted an INSERT forbidden by the owner-only policy.
+create or replace function private.add_project_owner_member()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null or new.created_by <> auth.uid() then
+    raise exception 'Only the authenticated project creator can create the owner membership';
+  end if;
+  insert into public.project_members (project_id,user_id,member_role,added_by)
+  values (new.id,new.created_by,'owner',new.created_by)
+  on conflict (project_id,user_id) do nothing;
+  return new;
+end;
+$$;
+revoke all on function private.add_project_owner_member() from public, anon;
+grant execute on function private.add_project_owner_member() to authenticated;
+drop trigger if exists projects_add_owner_member on public.projects;
+drop trigger if exists trg_add_project_owner_member on public.projects;
+create trigger trg_add_project_owner_member
+  after insert on public.projects
+  for each row execute function private.add_project_owner_member();
+revoke all on function public.add_project_owner_member() from public, anon, authenticated;
