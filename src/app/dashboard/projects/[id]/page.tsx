@@ -8,7 +8,7 @@ import ProjectLiveUpdates from "./project-live-updates";
 import ProjectPlanBuilder from "./plan-builder";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> };
-const taskLabels: Record<string,string> = { todo:"To do", in_progress:"In progress", blocked:"Blocked", completed:"Completed", cancelled:"Cancelled" };
+const taskLabels: Record<string,string> = { todo:"To do", in_progress:"In progress", blocked:"Blocked", awaiting_review:"Awaiting review", completed:"Approved", cancelled:"Cancelled" };
 const milestoneLabels: Record<string,string> = { pending:"Pending", in_progress:"In progress", completed:"Completed" };
 function money(amount: number | null, currency: string | null) {
   if (amount === null || !currency) return "Budget not set";
@@ -26,11 +26,11 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   if (!project) notFound();
   const isOwner = project.created_by === userId;
   const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}, {data: attachments}, {data: plan}, {data: schedule}] = await Promise.all([
-    supabase.from("tasks").select("id,title,description,status,assigned_to,due_at,completed_at,created_at").eq("project_id",id).order("sort_order").order("created_at"),
+    supabase.from("tasks").select("id,title,description,status,assigned_to,due_at,completed_at,created_at,blocked_reason,completion_note,completion_submitted_at").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_milestones").select("id,title,description,status,due_at,completed_at,sort_order").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_messages").select("id,sender_id,body,message_type,created_at").eq("project_id",id).order("created_at").limit(100),
     supabase.from("project_members").select("user_id,member_role").eq("project_id",id),
-    supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at").eq("project_id",id).order("created_at",{ascending:false}),
+    supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at,task_id").eq("project_id",id).order("created_at",{ascending:false}),
     supabase.from("request_plans").select("id,title,summary,source,status,steps").eq("project_id",id).maybeSingle(),
     supabase.from("project_schedules").select("id,provider_user_id,starts_at,ends_at,status,requested_by").eq("project_id",id).in("status",["pending","confirmed"]).maybeSingle(),
   ]);
@@ -38,7 +38,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const {data: profiles} = ids.length ? await supabase.from("profiles").select("id,display_name").in("id",ids) : {data:[]};
   const names = new Map((profiles ?? []).map(p=>[p.id,p.display_name || "RELAY member"]));
   const assignedMembers = (members ?? []).filter(m=>m.user_id !== userId);
-  const doneTasks = (tasks ?? []).filter(t=>t.status === "completed").length;
+  const doneTasks = (tasks ?? []).filter(t=>t.status === "completed").length;\n  const blockedTasks = (tasks ?? []).filter(t=>t.status === "blocked");\n  const reviewTasks = (tasks ?? []).filter(t=>t.status === "awaiting_review");\n  const overdueTasks = (tasks ?? []).filter(t=>t.due_at && new Date(t.due_at) < new Date() && !["completed","cancelled"].includes(t.status));\n  const missingEvidenceTasks = (tasks ?? []).filter(t=>t.status === "awaiting_review" && !(attachments ?? []).some(a=>a.task_id===t.id));
   const doneMilestones = (milestones ?? []).filter(m=>m.status === "completed").length;
   return <main className="dashboard-shell">
     <nav className="nav dashboard-nav"><Link className="brand" href="/"><span className="brand-mark">R</span><span>RELAY<span className="brand-period">.</span></span></Link><div className="trust-nav-actions"><Link className="signout-button trust-back-link" href="/dashboard/projects">← Projects</Link><form action={signOut}><button className="signout-button" type="submit">Sign out ↗</button></form></div></nav>
@@ -58,8 +58,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       {query.plan === "approved" ? <div className="request-success">✓ Plan approved. Tasks and milestones have been added to this project.</div> : null}
       {query.plan_error ? <div className="auth-alert">The plan could not be processed. Check the plan and try again.</div> : null}
       {isOwner || plan?.status === "approved" ? <ProjectPlanBuilder projectId={id} plan={plan as any} isOwner={isOwner}/> : null}
-      <div className="workspace-summary"><div><strong>{doneTasks}/{tasks?.length ?? 0}</strong><span>TASKS COMPLETE</span></div><div><strong>{doneMilestones}/{milestones?.length ?? 0}</strong><span>MILESTONES HIT</span></div><div><strong>{money(project.budget_amount_minor,project.currency)}</strong><span>AGREED QUOTE</span></div></div>
-      <section className="workspace-panel project-schedule-panel">
+      <div className="workspace-summary"><div><strong>{doneTasks}/{tasks?.length ?? 0}</strong><span>TASKS APPROVED</span></div><div><strong>{doneMilestones}/{milestones?.length ?? 0}</strong><span>MILESTONES HIT</span></div><div><strong>{money(project.budget_amount_minor,project.currency)}</strong><span>AGREED QUOTE</span></div></div>
+      <section className="workspace-panel progress-intelligence">\n        <div className="workspace-panel-heading"><div><span className="network-category">RELAY PROGRESS INTELLIGENCE</span><h2>What needs attention</h2></div><span>{blockedTasks.length+overdueTasks.length+reviewTasks.length} SIGNALS</span></div>\n        <div className="progress-signal-grid"><div><strong>{blockedTasks.length}</strong><span>BLOCKED</span></div><div><strong>{overdueTasks.length}</strong><span>OVERDUE</span></div><div><strong>{reviewTasks.length}</strong><span>AWAITING REVIEW</span></div><div><strong>{missingEvidenceTasks.length}</strong><span>REVIEW WITHOUT EVIDENCE</span></div></div>\n        {blockedTasks.length===0 && overdueTasks.length===0 && reviewTasks.length===0 ? <p className="workspace-empty">No urgent blockers. RELAY will highlight delays, blockers and review requests here.</p> : <div className="progress-signal-list">{[...blockedTasks.map(t=>({task:t,kind:"BLOCKED",detail:t.blocked_reason||"Reason not provided"})),...overdueTasks.map(t=>({task:t,kind:"OVERDUE",detail:`Due ${new Date(t.due_at!).toLocaleString()}`})),...reviewTasks.map(t=>({task:t,kind:"REVIEW",detail:t.completion_note||"Provider submitted work for customer review"}))].map((item)=><div key={item.task.id}><span className={`progress-signal-tag signal-${item.kind.toLowerCase()}`}>{item.kind}</span><strong>{item.task.title}</strong><small>{item.detail}</small></div>)}</div>}\n      </section>\n      <section className="workspace-panel project-schedule-panel">
         <div className="workspace-panel-heading"><div><span className="network-category">RELAY SMART SCHEDULING</span><h2>Job appointment</h2></div><span>{schedule?.status ? schedule.status.toUpperCase() : "NOT BOOKED"}</span></div>
         {schedule ? <>
           <p className="workspace-empty">{schedule.status === "confirmed" ? "Confirmed appointment" : "Waiting for provider confirmation"} · {new Date(schedule.starts_at).toLocaleString()} – {new Date(schedule.ends_at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</p>
@@ -75,9 +75,9 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
           <div className="workspace-panel-heading"><div><span className="network-category">THE PLAN</span><h2>Tasks</h2></div><span>{tasks?.length ?? 0} ITEMS</span></div>
           {!tasks?.length ? <p className="workspace-empty">No tasks yet. Break the work into clear steps.</p> : <div className="workspace-items">{tasks.map(task=><article className="workspace-item" key={task.id}>
             <div className="workspace-item-top"><h3>{task.title}</h3><span className={`workspace-state state-${task.status}`}>{taskLabels[task.status] ?? task.status}</span></div>
-            {task.description ? <p>{task.description}</p> : null}
+            {task.description ? <p>{task.description}</p> : null}\n            {task.status === "blocked" && task.blocked_reason ? <p className="task-blocked-reason">Blocker: {task.blocked_reason}</p> : null}\n            {task.status === "awaiting_review" && task.completion_note ? <p className="task-review-note">Provider note: {task.completion_note}</p> : null}
             <small>{task.assigned_to ? `Assigned to ${names.get(task.assigned_to) ?? "RELAY member"}` : "Unassigned"}{task.due_at ? ` · Due ${new Date(task.due_at).toLocaleDateString()}` : ""}</small>
-            {(isOwner || task.assigned_to === userId) && task.status !== "completed" && task.status !== "cancelled" ? <form action={updateTaskStatus} className="workspace-inline-form"><input type="hidden" name="project_id" value={id}/><input type="hidden" name="task_id" value={task.id}/><select name="status" defaultValue={task.status}><option value="todo">To do</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><button type="submit">Update</button></form> : null}
+            {(isOwner || task.assigned_to === userId) && task.status !== "completed" && task.status !== "cancelled" ? <form action={updateTaskStatus} className="workspace-inline-form"><input type="hidden" name="project_id" value={id}/><input type="hidden" name="task_id" value={task.id}/><select name="status" defaultValue={task.status}><option value="todo">To do</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option>{!isOwner ? <option value="awaiting_review">Submit for customer review</option> : <option value="completed">Approve completion</option>}</select><input name="blocked_reason" placeholder="If blocked: explain what is stopping progress" maxLength={500}/>{!isOwner ? <input name="completion_note" placeholder="Completion note for customer (optional)" maxLength={1000}/> : null}<button type="submit">{isOwner && task.status==="awaiting_review" ? "Review update ↗" : "Update"}</button></form> : null}
           </article>)}</div>}
           {isOwner ? <details className="workspace-composer"><summary>＋ Add a task</summary><form action={createProjectTask}>
             <input type="hidden" name="project_id" value={id}/><label>Task title<input name="title" required minLength={2} maxLength={180} placeholder="e.g. Pick up the materials"/></label>
@@ -99,7 +99,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
           </form></details> : null}
         </section>
       </div>
-      <ProjectLiveUpdates projectId={id} userId={userId} initialMessages={messages ?? []} initialAttachments={attachments ?? []} names={Object.fromEntries(names)} />
+      <ProjectLiveUpdates projectId={id} userId={userId} initialMessages={messages ?? []} initialAttachments={attachments ?? []} taskOptions={(tasks ?? []).map(t=>({id:t.id,title:t.title}))} names={Object.fromEntries(names)} />
     </section>
     <footer className="dashboard-footer"><span>RELAY · MAKE IT HAPPEN</span><span>Make it happen, together.</span></footer>
   </main>;
