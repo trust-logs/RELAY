@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 type Message = { id:string; sender_id:string; body:string; message_type:string; created_at:string };
 type Attachment = { id:string; uploaded_by:string; file_name:string; object_path:string; mime_type:string; file_size:number; created_at:string; task_id?:string|null; signedUrl?:string };
@@ -11,6 +12,7 @@ const ALLOWED_TYPES=["image/jpeg","image/png","image/webp","application/pdf"];
 
 export default function ProjectLiveUpdates({projectId,userId,initialMessages,initialAttachments,taskOptions,names}:Props) {
   const supabase=useMemo(()=>createClient(),[]);
+  const router=useRouter();
   const [messages,setMessages]=useState(initialMessages);
   const [attachments,setAttachments]=useState(initialAttachments);
   const [body,setBody]=useState("");
@@ -36,9 +38,10 @@ export default function ProjectLiveUpdates({projectId,userId,initialMessages,ini
         setMessages(current=>current.some(m=>m.id===next.id)?current:[...current,next]);
       })
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"project_attachments",filter:`project_id=eq.${projectId}`},()=>{void loadAttachments();})
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"tasks",filter:`project_id=eq.${projectId}`},()=>{router.refresh();})
       .subscribe();
     return ()=>{void supabase.removeChannel(channel);};
-  },[projectId,supabase,loadAttachments]);
+  },[projectId,supabase,loadAttachments,router]);
 
   useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth",block:"end"});},[messages]);
   useEffect(()=>{void loadAttachments();},[loadAttachments]);
