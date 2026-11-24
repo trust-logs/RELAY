@@ -4,23 +4,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type Message = { id:string; sender_id:string; body:string; message_type:string; created_at:string };
-type Attachment = { id:string; uploaded_by:string; file_name:string; object_path:string; mime_type:string; file_size:number; created_at:string; signedUrl?:string };
-type Props = { projectId:string; userId:string; initialMessages:Message[]; initialAttachments:Attachment[]; names:Record<string,string> };
+type Attachment = { id:string; uploaded_by:string; file_name:string; object_path:string; mime_type:string; file_size:number; created_at:string; task_id?:string|null; signedUrl?:string };
+type Props = { projectId:string; userId:string; initialMessages:Message[]; initialAttachments:Attachment[]; taskOptions:{id:string;title:string}[]; names:Record<string,string> };
 const MAX_FILE_SIZE=10*1024*1024;
 const ALLOWED_TYPES=["image/jpeg","image/png","image/webp","application/pdf"];
 
-export default function ProjectLiveUpdates({projectId,userId,initialMessages,initialAttachments,names}:Props) {
+export default function ProjectLiveUpdates({projectId,userId,initialMessages,initialAttachments,taskOptions,names}:Props) {
   const supabase=useMemo(()=>createClient(),[]);
   const [messages,setMessages]=useState(initialMessages);
   const [attachments,setAttachments]=useState(initialAttachments);
   const [body,setBody]=useState("");
   const [sending,setSending]=useState(false);
   const [uploading,setUploading]=useState(false);
-  const [notice,setNotice]=useState("");
+  const [notice,setNotice]=useState("");\n  const [evidenceTaskId,setEvidenceTaskId]=useState("");
   const bottomRef=useRef<HTMLDivElement>(null);
 
   const loadAttachments=useCallback(async()=>{
-    const {data,error}=await supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at").eq("project_id",projectId).order("created_at",{ascending:false});
+    const {data,error}=await supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at,task_id").eq("project_id",projectId).order("created_at",{ascending:false});
     if(error)return;
     const rows=await Promise.all((data??[]).map(async item=>{
       const {data:link}=await supabase.storage.from("project-evidence").createSignedUrl(item.object_path,300);
@@ -66,7 +66,7 @@ export default function ProjectLiveUpdates({projectId,userId,initialMessages,ini
     const {error:uploadError}=await supabase.storage.from("project-evidence").upload(path,file,{contentType:file.type,upsert:false});
     if(uploadError){setNotice("Upload failed. Please try again.");setUploading(false);return;}
     const {error:recordError}=await supabase.from("project_attachments").insert({
-      project_id:projectId,uploaded_by:userId,file_name:file.name.slice(0,240),object_path:path,mime_type:file.type,file_size:file.size
+      project_id:projectId,task_id:evidenceTaskId||null,uploaded_by:userId,file_name:file.name.slice(0,240),object_path:path,mime_type:file.type,file_size:file.size
     });
     if(recordError){
       await supabase.storage.from("project-evidence").remove([path]);
@@ -84,8 +84,8 @@ export default function ProjectLiveUpdates({projectId,userId,initialMessages,ini
     <form onSubmit={sendMessage} className="workspace-message-form"><textarea value={body} onChange={e=>setBody(e.target.value)} rows={2} required maxLength={4000} placeholder="Send a project update or message…"/><button type="submit" disabled={sending||!body.trim()}>{sending?"Sending…":"Send message ↗"}</button></form>
     <div className="workspace-evidence">
       <div className="workspace-panel-heading"><div><span className="network-category">PROOF OF WORK</span><h2>Project evidence</h2></div><label className="evidence-upload">{uploading?"Uploading…":"＋ Add file"}<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={uploadFile} disabled={uploading}/></label></div>
-      <p className="workspace-empty">Share delivery photos, inspection images or PDF documents. Private to project participants · 10 MB max per file.</p>
-      {attachments.length?<div className="workspace-evidence-list">{attachments.map(file=><a className="workspace-evidence-item" key={file.id} href={file.signedUrl??"#"} target="_blank" rel="noreferrer"><span className="evidence-file-icon">{file.mime_type==="application/pdf"?"PDF":"IMG"}</span><span><strong>{file.file_name}</strong><small>{(file.file_size/1024/1024).toFixed(2)} MB · {names[file.uploaded_by]??"RELAY member"} · {new Date(file.created_at).toLocaleDateString()}</small></span><b>↗</b></a>)}</div>:<p className="workspace-empty">No evidence files shared yet.</p>}
+      <p className="workspace-empty">Share delivery photos, inspection images or PDF documents. Link evidence to a task so the customer can review the exact work. Private to project participants · 10 MB max per file.</p>\n      {taskOptions.length ? <label className="evidence-task-select">Attach evidence to<select value={evidenceTaskId} onChange={e=>setEvidenceTaskId(e.target.value)}><option value="">General project evidence</option>{taskOptions.map(task=><option key={task.id} value={task.id}>{task.title}</option>)}</select></label> : null}
+      {attachments.length?<div className="workspace-evidence-list">{attachments.map(file=><a className="workspace-evidence-item" key={file.id} href={file.signedUrl??"#"} target="_blank" rel="noreferrer"><span className="evidence-file-icon">{file.mime_type==="application/pdf"?"PDF":"IMG"}</span><span><strong>{file.file_name}</strong><small>{(file.file_size/1024/1024).toFixed(2)} MB · {names[file.uploaded_by]??"RELAY member"}{file.task_id ? ` · ${taskOptions.find(t=>t.id===file.task_id)?.title??"Task evidence"}` : " · General project evidence"} · {new Date(file.created_at).toLocaleDateString()}</small></span><b>↗</b></a>)}</div>:<p className="workspace-empty">No evidence files shared yet.</p>}
     </div>
     {notice?<p className="workspace-live-notice" role="status">{notice}</p>:null}
   </section>;
