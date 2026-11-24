@@ -71,7 +71,7 @@ function validatePlan(value: unknown, fallback: ExecutionPlan): ExecutionPlan {
     if (!step || typeof step !== "object") return [];
     const item = step as Record<string, unknown>;
     if (typeof item.title !== "string" || typeof item.description !== "string") return [];
-    const owner = item.owner === "provider" || item.owner === "both" ? item.owner : "customer";
+    const owner: PlanStep["owner"] = item.owner === "provider" || item.owner === "both" ? item.owner : "customer";
     return [{ title: item.title.slice(0, 120), description: item.description.slice(0, 700), owner, requiresApproval: item.requiresApproval === true }];
   });
   if (!steps.length) return fallback;
