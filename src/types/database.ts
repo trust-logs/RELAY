@@ -226,6 +226,15 @@ export type Database = {
           },
         ]
       }
+      project_schedules: {
+        Row: { id: string; project_id: string; provider_user_id: string; requested_by: string; starts_at: string; ends_at: string; status: string; created_at: string; updated_at: string }
+        Insert: { id?: string; project_id: string; provider_user_id: string; requested_by: string; starts_at: string; ends_at: string; status?: string; created_at?: string; updated_at?: string }
+        Update: { id?: string; project_id?: string; provider_user_id?: string; requested_by?: string; starts_at?: string; ends_at?: string; status?: string; created_at?: string; updated_at?: string }
+        Relationships: [
+          { foreignKeyName: "project_schedules_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_schedules_provider_user_id_fkey"; columns: ["provider_user_id"]; isOneToOne: false; referencedRelation: "provider_profiles"; referencedColumns: ["user_id"] }
+        ]
+      }
       provider_availability: {
         Row: { id: string; user_id: string; day_of_week: number; start_time: string; end_time: string; timezone: string; created_at: string; updated_at: string }
         Insert: { id?: string; user_id: string; day_of_week: number; start_time: string; end_time: string; timezone?: string; created_at?: string; updated_at?: string }
@@ -454,6 +463,9 @@ export type Database = {
     Functions: {
     save_provider_availability: { Args: { p_timezone: string; p_windows: Json }; Returns: undefined };
 
+      request_project_schedule: { Args: { p_project_id: string; p_starts_at: string; p_ends_at: string }; Returns: string }
+      confirm_project_schedule: { Args: { p_schedule_id: string }; Returns: undefined }
+      decline_project_schedule: { Args: { p_schedule_id: string }; Returns: undefined }
       accept_proposal: { Args: { p_proposal_id: string }; Returns: string }
       approve_request_plan: { Args: { p_plan_id: string }; Returns: string }
     }
