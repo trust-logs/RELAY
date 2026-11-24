@@ -149,3 +149,15 @@ export async function declineProjectSchedule(formData: FormData) {
   revalidatePath(projectPath(projectId));
   redirect(`${projectPath(projectId)}?schedule=declined`);
 }
+
+
+export async function cancelProjectSchedule(formData: FormData) {
+  const { supabase } = await signedIn();
+  const projectId = String(formData.get("project_id") ?? "");
+  const scheduleId = String(formData.get("schedule_id") ?? "");
+  if (!uuid.test(projectId) || !uuid.test(scheduleId)) redirect("/dashboard/projects");
+  const { error } = await supabase.rpc("cancel_project_schedule", { p_schedule_id: scheduleId });
+  if (error) redirect(`${projectPath(projectId)}?schedule_error=1`);
+  revalidatePath(projectPath(projectId));
+  redirect(`${projectPath(projectId)}?schedule=cancelled`);
+}
