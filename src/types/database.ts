@@ -353,13 +353,17 @@ export type Database = {
       tasks: {
         Row: {
           assigned_to: string | null
+          blocked_reason: string | null
           completed_at: string | null
+          completion_note: string | null
+          completion_submitted_at: string | null
           created_at: string
           created_by: string
           description: string
           due_at: string | null
           id: string
           project_id: string
+          reviewed_at: string | null
           sort_order: number
           status: string
           title: string
@@ -367,13 +371,17 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          blocked_reason?: string | null
           completed_at?: string | null
+          completion_note?: string | null
+          completion_submitted_at?: string | null
           created_at?: string
           created_by: string
           description?: string
           due_at?: string | null
           id?: string
           project_id: string
+          reviewed_at?: string | null
           sort_order?: number
           status?: string
           title: string
@@ -381,13 +389,17 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          blocked_reason?: string | null
           completed_at?: string | null
+          completion_note?: string | null
+          completion_submitted_at?: string | null
           created_at?: string
           created_by?: string
           description?: string
           due_at?: string | null
           id?: string
           project_id?: string
+          reviewed_at?: string | null
           sort_order?: number
           status?: string
           title?: string
@@ -454,11 +466,12 @@ export type Database = {
         ]
       }
       project_attachments: {
-        Row: { id: string; project_id: string; uploaded_by: string; file_name: string; object_path: string; mime_type: string; file_size: number; created_at: string }
-        Insert: { id?: string; project_id: string; uploaded_by: string; file_name: string; object_path: string; mime_type: string; file_size: number; created_at?: string }
-        Update: { id?: string; project_id?: string; uploaded_by?: string; file_name?: string; object_path?: string; mime_type?: string; file_size?: number; created_at?: string }
+        Row: { id: string; project_id: string; task_id: string | null; uploaded_by: string; file_name: string; object_path: string; mime_type: string; file_size: number; created_at: string }
+        Insert: { id?: string; project_id: string; task_id?: string | null; uploaded_by: string; file_name: string; object_path: string; mime_type: string; file_size: number; created_at?: string }
+        Update: { id?: string; project_id?: string; task_id?: string | null; uploaded_by?: string; file_name?: string; object_path?: string; mime_type?: string; file_size?: number; created_at?: string }
         Relationships: [
           { foreignKeyName: "project_attachments_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_attachments_task_id_fkey"; columns: ["task_id"]; isOneToOne: false; referencedRelation: "tasks"; referencedColumns: ["id"] },
           { foreignKeyName: "project_attachments_uploaded_by_fkey"; columns: ["uploaded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }
         ]
       }
