@@ -108,3 +108,44 @@ export async function sendProjectMessage(formData: FormData) {
   revalidatePath(projectPath(projectId));
   redirect(projectPath(projectId));
 }
+
+
+export async function requestProjectSchedule(formData: FormData) {
+  const { supabase } = await signedIn();
+  const projectId = String(formData.get("project_id") ?? "");
+  const startsAt = String(formData.get("starts_at") ?? "");
+  const endsAt = String(formData.get("ends_at") ?? "");
+  if (!uuid.test(projectId) || !startsAt || !endsAt || !Number.isFinite(Date.parse(startsAt)) || !Number.isFinite(Date.parse(endsAt))) {
+    redirect("/dashboard/projects");
+  }
+  const { error } = await supabase.rpc("request_project_schedule", {
+    p_project_id: projectId,
+    p_starts_at: new Date(startsAt).toISOString(),
+    p_ends_at: new Date(endsAt).toISOString(),
+  });
+  if (error) redirect(`${projectPath(projectId)}?schedule_error=1`);
+  revalidatePath(projectPath(projectId));
+  redirect(`${projectPath(projectId)}?schedule=requested`);
+}
+
+export async function confirmProjectSchedule(formData: FormData) {
+  const { supabase } = await signedIn();
+  const projectId = String(formData.get("project_id") ?? "");
+  const scheduleId = String(formData.get("schedule_id") ?? "");
+  if (!uuid.test(projectId) || !uuid.test(scheduleId)) redirect("/dashboard/projects");
+  const { error } = await supabase.rpc("confirm_project_schedule", { p_schedule_id: scheduleId });
+  if (error) redirect(`${projectPath(projectId)}?schedule_error=1`);
+  revalidatePath(projectPath(projectId));
+  redirect(`${projectPath(projectId)}?schedule=confirmed`);
+}
+
+export async function declineProjectSchedule(formData: FormData) {
+  const { supabase } = await signedIn();
+  const projectId = String(formData.get("project_id") ?? "");
+  const scheduleId = String(formData.get("schedule_id") ?? "");
+  if (!uuid.test(projectId) || !uuid.test(scheduleId)) redirect("/dashboard/projects");
+  const { error } = await supabase.rpc("decline_project_schedule", { p_schedule_id: scheduleId });
+  if (error) redirect(`${projectPath(projectId)}?schedule_error=1`);
+  revalidatePath(projectPath(projectId));
+  redirect(`${projectPath(projectId)}?schedule=declined`);
+}
