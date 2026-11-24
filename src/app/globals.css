@@ -772,3 +772,75 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
 .project-schedule-panel .workspace-inline-form form { margin:0; }
 .project-schedule-panel .workspace-inline-form form + form button { background:#f0edf4; color:var(--ink); }
 @media(max-width:560px) { .project-schedule-form { grid-template-columns:1fr; padding:12px; } }
+
+
+/* RELAY AI execution planner */
+.ai-plan-page { width:min(1080px,calc(100% - 48px)); margin:0 auto; padding:54px 0 76px; }
+.ai-plan-hero { display:grid; grid-template-columns:1fr 190px; gap:32px; align-items:center; padding:38px 0 34px; border-bottom:1px solid var(--line); }
+.ai-plan-hero h1 { margin:12px 0; font-size:clamp(34px,5vw,54px); line-height:1.04; letter-spacing:-2.8px; }
+.ai-plan-hero p { max-width:740px; color:var(--muted); font-size:13px; line-height:1.8; white-space:pre-wrap; }
+.ai-plan-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.ai-plan-meta span,.ai-step-tags span { padding:7px 10px; border-radius:30px; background:#f2eff9; color:#746c84; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
+.ai-plan-orb { width:160px; height:160px; border-radius:50%; background:var(--ink); color:white; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 18px 44px #8257f526; }
+.ai-plan-orb span { color:var(--lime); font-size:34px; }
+.ai-plan-orb strong { font:800 22px Manrope; letter-spacing:-1px; }
+.ai-plan-orb small { color:#aaa4b8; font-size:7px; letter-spacing:1.5px; margin-top:5px; }
+.ai-plan-empty { max-width:590px; margin:55px auto; padding:42px; text-align:center; border:1px solid var(--line); border-radius:22px; box-shadow:0 16px 50px #21163808; }
+.ai-plan-empty-icon { margin:0 auto 18px; width:54px; height:54px; border-radius:17px; display:grid; place-items:center; background:#f0ebff; color:var(--violet); font-size:27px; }
+.ai-plan-empty h2 { font-size:27px; letter-spacing:-1.2px; margin-bottom:10px; }
+.ai-plan-empty p { color:var(--muted); font-size:13px; line-height:1.8; }
+.ai-plan-empty small { display:block; margin-top:16px; color:#9993a1; font-size:10px; }
+.ai-plan-empty .auth-submit { max-width:320px; margin:24px auto 0; }
+.ai-plan-toolbar { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:34px 0 22px; }
+.ai-plan-toolbar h2 { margin:9px 0; font-size:26px; letter-spacing:-1px; }
+.ai-plan-toolbar p { max-width:700px; color:var(--muted); font-size:12px; line-height:1.8; }
+.ai-plan-status { flex:none; padding:9px 12px; border-radius:30px; background:#f3efff; color:#7952dc; font-size:9px; font-weight:800; letter-spacing:.7px; }
+.ai-plan-status.approved { background:#eff9e5; color:#4c8c2c; }
+.ai-plan-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:16px; }
+.ai-plan-card { padding:24px; border:1px solid var(--line); border-radius:17px; background:white; }
+.ai-plan-section-head { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+.ai-plan-section-head > span { color:var(--violet); font:800 10px Manrope; }
+.ai-plan-section-head h3 { margin:0; font-size:17px; letter-spacing:-.5px; }
+.ai-plan-steps ol { list-style:none; padding:0; margin:0; }
+.ai-plan-steps li { display:grid; grid-template-columns:38px 1fr; gap:12px; padding:18px 0; border-top:1px solid #f0edf5; }
+.ai-step-number { width:32px; height:32px; display:grid; place-items:center; border-radius:10px; background:#f2efff; color:var(--violet); font:800 10px Manrope; }
+.ai-plan-steps h4 { margin:0 0 7px; font:700 13px Manrope; }
+.ai-plan-steps li p,.ai-plan-guidance p { margin:0; color:var(--muted); font-size:11px; line-height:1.8; }
+.ai-step-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:11px; }
+.ai-step-tags span { font-size:8px; padding:6px 8px; }
+.ai-step-tags .approval-tag { color:#9a6125; background:#fff3e6; }
+.ai-plan-side { display:flex; flex-direction:column; gap:16px; }
+.ai-plan-bullets { padding-left:17px; margin:0; color:#696474; font-size:11px; line-height:1.8; }
+.ai-plan-bullets li { margin:7px 0; }
+.ai-plan-bullets.risk li::marker { color:#e6a45e; }
+.ai-provider-match { display:flex; align-items:center; gap:10px; margin-top:18px; padding:13px; border-radius:12px; background:#f6f4fb; }
+.ai-provider-match strong { color:var(--violet); font:800 25px Manrope; }
+.ai-provider-match span { color:#7d7787; font-size:10px; line-height:1.5; }
+.ai-provider-list { margin-top:12px; }
+.ai-provider-list > div { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; border-top:1px solid #f0edf5; }
+.ai-provider-list strong,.ai-provider-list small { display:block; }
+.ai-provider-list strong { font-size:11px; }
+.ai-provider-list small { margin-top:4px; color:#9993a1; font-size:9px; }
+.ai-unverified { color:#9993a1; font-size:8px; font-weight:800; }
+.ai-plan-muted { margin:14px 0 0; color:#9993a1; font-size:10px; line-height:1.7; }
+.ai-plan-guidance-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+.ai-plan-guidance { padding:20px 22px; border-radius:15px; background:#f7f5fb; }
+.ai-plan-guidance p { margin-top:9px; }
+.ai-plan-footer { display:flex; justify-content:space-between; align-items:center; gap:24px; margin-top:20px; padding:24px; border-radius:17px; background:var(--ink); color:white; }
+.ai-plan-footer strong { font:700 15px Manrope; }
+.ai-plan-footer p { max-width:620px; margin:8px 0 0; color:#b6b1c0; font-size:10px; line-height:1.7; }
+.ai-plan-actions { display:flex; flex-direction:column; gap:10px; min-width:190px; }
+.ai-plan-actions .auth-submit { margin:0; background:var(--lime); color:var(--ink); }
+.ai-plan-actions .auth-submit span { color:var(--ink); }
+.ai-plan-actions .listing-toggle { color:white; border-color:#4a4555; }
+.ai-plan-back { display:flex; justify-content:space-between; gap:16px; margin-top:25px; color:var(--violet); font-size:11px; font-weight:700; }
+@media(max-width:760px) {
+ .ai-plan-page { width:calc(100% - 36px); padding-top:35px; }
+ .ai-plan-hero { grid-template-columns:1fr; }
+ .ai-plan-orb { display:none; }
+ .ai-plan-grid,.ai-plan-guidance-grid { grid-template-columns:1fr; }
+ .ai-plan-toolbar,.ai-plan-footer { flex-direction:column; align-items:stretch; }
+ .ai-plan-actions { min-width:0; }
+ .ai-plan-empty { padding:28px 20px; }
+ .ai-plan-back { flex-direction:column; }
+}
