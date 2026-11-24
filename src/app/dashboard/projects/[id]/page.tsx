@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
-import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus } from "@/app/actions/project-execution";
+import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus, requestProjectSchedule, confirmProjectSchedule, declineProjectSchedule } from "@/app/actions/project-execution";
+import ProjectScheduleForm from "./schedule-form";
 import ProjectLiveUpdates from "./project-live-updates";
 import ProjectPlanBuilder from "./plan-builder";
 
@@ -24,13 +25,14 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const { data: project } = await supabase.from("projects").select("id,title,description,status,budget_amount_minor,currency,created_by,created_at,due_at,request_id").eq("id",id).maybeSingle();
   if (!project) notFound();
   const isOwner = project.created_by === userId;
-  const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}, {data: attachments}, {data: plan}] = await Promise.all([
+  const [{data: tasks}, {data: milestones}, {data: messages}, {data: members}, {data: attachments}, {data: plan}, {data: schedule}] = await Promise.all([
     supabase.from("tasks").select("id,title,description,status,assigned_to,due_at,completed_at,created_at").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_milestones").select("id,title,description,status,due_at,completed_at,sort_order").eq("project_id",id).order("sort_order").order("created_at"),
     supabase.from("project_messages").select("id,sender_id,body,message_type,created_at").eq("project_id",id).order("created_at").limit(100),
     supabase.from("project_members").select("user_id,member_role").eq("project_id",id),
     supabase.from("project_attachments").select("id,uploaded_by,file_name,object_path,mime_type,file_size,created_at").eq("project_id",id).order("created_at",{ascending:false}),
     supabase.from("request_plans").select("id,title,summary,source,status,steps").eq("project_id",id).maybeSingle(),
+    supabase.from("project_schedules").select("id,provider_user_id,starts_at,ends_at,status,requested_by").eq("project_id",id).in("status",["pending","confirmed"]).maybeSingle(),
   ]);
   const ids = [...new Set([...(members ?? []).map(m=>m.user_id),...(messages ?? []).map(m=>m.sender_id),...(attachments ?? []).map(a=>a.uploaded_by)])];
   const {data: profiles} = ids.length ? await supabase.from("profiles").select("id,display_name").in("id",ids) : {data:[]};
@@ -44,6 +46,10 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       <div className="auth-kicker"><span className="live-dot" /> RELAY · SHARED PROJECT</div>
       <div className="network-heading"><div><span className="network-category">{isOwner ? "CUSTOMER PROJECT" : "PROVIDER ASSIGNMENT"}</span><h1>{project.title}</h1><p>{project.description || "A shared space to coordinate the work and keep everyone aligned."}</p></div><div className="network-count"><strong>{project.status.replaceAll("_"," ")}</strong><span>PROJECT STATUS</span></div></div>
       {query.error ? <div className="auth-alert">That update couldn't be saved. Please check the details and try again.</div> : null}
+      {query.schedule_error ? <div className="auth-alert">That time could not be booked. Check the provider's hours or choose another time.</div> : null}
+      {query.schedule === "requested" ? <div className="request-success">✓ Schedule request sent to the provider.</div> : null}
+      {query.schedule === "confirmed" ? <div className="request-success">✓ Job time confirmed. RELAY has reserved this provider's slot.</div> : null}
+      {query.schedule === "declined" ? <div className="request-success">Schedule request declined.</div> : null}
       {query.task === "created" ? <div className="request-success">✓ Task added to the project.</div> : null}
       {query.milestone === "created" ? <div className="request-success">✓ Milestone added.</div> : null}
       {query.plan === "generated" ? <div className="request-success">✓ RELAY has drafted an execution plan. Review it before approval.</div> : null}
@@ -52,6 +58,16 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       {query.plan_error ? <div className="auth-alert">The plan could not be processed. Check the plan and try again.</div> : null}
       {isOwner || plan?.status === "approved" ? <ProjectPlanBuilder projectId={id} plan={plan as any} isOwner={isOwner}/> : null}
       <div className="workspace-summary"><div><strong>{doneTasks}/{tasks?.length ?? 0}</strong><span>TASKS COMPLETE</span></div><div><strong>{doneMilestones}/{milestones?.length ?? 0}</strong><span>MILESTONES HIT</span></div><div><strong>{money(project.budget_amount_minor,project.currency)}</strong><span>AGREED QUOTE</span></div></div>
+      <section className="workspace-panel project-schedule-panel">
+        <div className="workspace-panel-heading"><div><span className="network-category">RELAY SMART SCHEDULING</span><h2>Job appointment</h2></div><span>{schedule?.status ? schedule.status.toUpperCase() : "NOT BOOKED"}</span></div>
+        {schedule ? <>
+          <p className="workspace-empty">{schedule.status === "confirmed" ? "Confirmed appointment" : "Waiting for provider confirmation"} · {new Date(schedule.starts_at).toLocaleString()} – {new Date(schedule.ends_at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</p>
+          {schedule.status === "pending" && schedule.provider_user_id === userId ? <div className="workspace-inline-form">
+            <form action={confirmProjectSchedule}><input type="hidden" name="project_id" value={id}/><input type="hidden" name="schedule_id" value={schedule.id}/><button type="submit">Confirm this time ↗</button></form>
+            <form action={declineProjectSchedule}><input type="hidden" name="project_id" value={id}/><input type="hidden" name="schedule_id" value={schedule.id}/><button type="submit">Decline</button></form>
+          </div> : null}
+        </> : isOwner ? <><p className="workspace-empty">Choose the appointment window. The provider must confirm it, and RELAY checks their working hours and existing confirmed jobs.</p><ProjectScheduleForm projectId={id} action={requestProjectSchedule}/></> : <p className="workspace-empty">The customer has not requested an appointment yet.</p>}
+      </section>
       <div className="workspace-grid">
         <section className="workspace-panel">
           <div className="workspace-panel-heading"><div><span className="network-category">THE PLAN</span><h2>Tasks</h2></div><span>{tasks?.length ?? 0} ITEMS</span></div>
