@@ -54,3 +54,21 @@ begin
     alter publication supabase_realtime add table public.tasks;
   end if;
 end $$;
+
+-- Prevent evidence from being linked to a task in another project.
+create or replace function private.guard_project_attachment_task()
+returns trigger language plpgsql security invoker set search_path = ''
+as $$
+declare v_task_project uuid;
+begin
+  if new.task_id is not null then
+    select t.project_id into v_task_project from public.tasks t where t.id=new.task_id;
+    if v_task_project is null or v_task_project is distinct from new.project_id then
+      raise exception 'Evidence must be linked to a task in the same project';
+    end if;
+  end if;
+  return new;
+end; $$;
+drop trigger if exists trg_guard_project_attachment_task on public.project_attachments;
+create trigger trg_guard_project_attachment_task before insert or update of task_id,project_id on public.project_attachments for each row execute function private.guard_project_attachment_task();
+revoke all on function private.guard_project_attachment_task() from public,anon,authenticated;
