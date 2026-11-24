@@ -532,6 +532,7 @@ h1, h2, h3 { font-family: Manrope, sans-serif; }
 .state-completed { background:#eff8e7; color:#598139; }
 .state-in_progress { background:#f0ebff; color:#7552d5; }
 .state-blocked { background:#fff1e8; color:#b66a32; }
+.state-awaiting_review { background:#eff9e7; color:#568b36; }
 .workspace-inline-form { display:flex; gap:7px; margin-top:12px; }
 .workspace-inline-form select, .workspace-composer select, .workspace-composer input, .workspace-composer textarea, .workspace-message-form textarea { min-width:0; width:100%; padding:10px 11px; border:1px solid #e6e1ed; border-radius:9px; background:#fff; color:var(--ink); font:10px 'DM Sans'; }
 .workspace-inline-form button, .workspace-composer button, .workspace-message-form button { flex:0 0 auto; padding:10px 13px; border:0; border-radius:25px; background:var(--ink); color:white; font:800 8px 'DM Sans'; cursor:pointer; }
