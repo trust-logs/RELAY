@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 const uuid = /^[0-9a-f-]{36}$/i;
-const taskStatuses = ["todo", "in_progress", "blocked", "completed", "cancelled"] as const;
+const taskStatuses = ["todo", "in_progress", "blocked", "awaiting_review", "completed", "cancelled"] as const;
 const milestoneStatuses = ["pending", "in_progress", "completed"] as const;
 
 async function signedIn() {
@@ -47,15 +47,24 @@ export async function updateTaskStatus(formData: FormData) {
   const { supabase, userId } = await signedIn();
   const projectId = String(formData.get("project_id") ?? "");
   const taskId = String(formData.get("task_id") ?? "");
-  const status = String(formData.get("status") ?? "");
+  let status = String(formData.get("status") ?? "");
+  const blockedReason = String(formData.get("blocked_reason") ?? "").trim();
+  const completionNote = String(formData.get("completion_note") ?? "").trim();
   if (!uuid.test(projectId) || !uuid.test(taskId) || !taskStatuses.includes(status as typeof taskStatuses[number])) redirect("/dashboard/projects");
   const { data: task } = await supabase.from("tasks").select("id,project_id,assigned_to,completed_at").eq("id", taskId).eq("project_id", projectId).maybeSingle();
-  if (!task || task.assigned_to !== userId) {
-    const { data: project } = await supabase.from("projects").select("created_by").eq("id", projectId).maybeSingle();
-    if (!project || project.created_by !== userId) redirect(projectPath(projectId));
-  }
+  const { data: project } = await supabase.from("projects").select("created_by").eq("id", projectId).maybeSingle();
+  if (!task || !project || (task.assigned_to !== userId && project.created_by !== userId)) redirect(projectPath(projectId));
+  const isOwner = project.created_by === userId;
+  if (!isOwner && status === "completed") status = "awaiting_review";
+  if (status === "blocked" && blockedReason.length < 3) redirect(`${projectPath(projectId)}?error=blocked-reason`);
+  if (completionNote.length > 1000) redirect(projectPath(projectId));
   const { error } = await supabase.from("tasks").update({
-    status, completed_at: status === "completed" ? new Date().toISOString() : null, updated_at: new Date().toISOString(),
+    status,
+    blocked_reason: status === "blocked" ? blockedReason : null,
+    completion_note: status === "awaiting_review" ? completionNote || null : null,
+    completion_submitted_at: status === "awaiting_review" ? new Date().toISOString() : null,
+    completed_at: status === "completed" ? new Date().toISOString() : null,
+    updated_at: new Date().toISOString(),
   }).eq("id", taskId).eq("project_id", projectId);
   if (error) redirect(`${projectPath(projectId)}?error=task-update`);
   revalidatePath(projectPath(projectId));
