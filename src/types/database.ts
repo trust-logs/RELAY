@@ -466,6 +466,7 @@ export type Database = {
       request_project_schedule: { Args: { p_project_id: string; p_starts_at: string; p_ends_at: string }; Returns: string }
       confirm_project_schedule: { Args: { p_schedule_id: string }; Returns: undefined }
       decline_project_schedule: { Args: { p_schedule_id: string }; Returns: undefined }
+      cancel_project_schedule: { Args: { p_schedule_id: string }; Returns: undefined }
       accept_proposal: { Args: { p_proposal_id: string }; Returns: string }
       approve_request_plan: { Args: { p_plan_id: string }; Returns: string }
     }
