@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
-import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus, requestProjectSchedule, confirmProjectSchedule, declineProjectSchedule } from "@/app/actions/project-execution";
+import { createProjectTask, updateTaskStatus, createProjectMilestone, updateMilestoneStatus, requestProjectSchedule, confirmProjectSchedule, declineProjectSchedule, cancelProjectSchedule } from "@/app/actions/project-execution";
 import ProjectScheduleForm from "./schedule-form";
 import ProjectLiveUpdates from "./project-live-updates";
 import ProjectPlanBuilder from "./plan-builder";
@@ -50,6 +50,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       {query.schedule === "requested" ? <div className="request-success">✓ Schedule request sent to the provider.</div> : null}
       {query.schedule === "confirmed" ? <div className="request-success">✓ Job time confirmed. RELAY has reserved this provider's slot.</div> : null}
       {query.schedule === "declined" ? <div className="request-success">Schedule request declined.</div> : null}
+      {query.schedule === "cancelled" ? <div className="request-success">Appointment cancelled. The provider's time slot is released.</div> : null}
       {query.task === "created" ? <div className="request-success">✓ Task added to the project.</div> : null}
       {query.milestone === "created" ? <div className="request-success">✓ Milestone added.</div> : null}
       {query.plan === "generated" ? <div className="request-success">✓ RELAY has drafted an execution plan. Review it before approval.</div> : null}
@@ -66,6 +67,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
             <form action={confirmProjectSchedule}><input type="hidden" name="project_id" value={id}/><input type="hidden" name="schedule_id" value={schedule.id}/><button type="submit">Confirm this time ↗</button></form>
             <form action={declineProjectSchedule}><input type="hidden" name="project_id" value={id}/><input type="hidden" name="schedule_id" value={schedule.id}/><button type="submit">Decline</button></form>
           </div> : null}
+          {schedule.status === "confirmed" || (schedule.status === "pending" && isOwner) ? <form action={cancelProjectSchedule} className="workspace-inline-form"><input type="hidden" name="project_id" value={id}/><input type="hidden" name="schedule_id" value={schedule.id}/><button type="submit">Cancel appointment</button></form> : null}
         </> : isOwner ? <><p className="workspace-empty">Choose the appointment window. The provider must confirm it, and RELAY checks their working hours and existing confirmed jobs.</p><ProjectScheduleForm projectId={id} action={requestProjectSchedule}/></> : <p className="workspace-empty">The customer has not requested an appointment yet.</p>}
       </section>
       <div className="workspace-grid">
