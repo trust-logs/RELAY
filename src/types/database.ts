@@ -294,6 +294,62 @@ export type Database = {
           },
         ]
       }
+      request_execution_plans: {
+        Row: {
+          id: string
+          request_id: string
+          created_by: string
+          title: string
+          summary: string
+          source: string
+          status: string
+          steps: Json
+          provider_needs: Json
+          risks: Json
+          budget_guidance: string
+          timeline_guidance: string
+          approved_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          request_id: string
+          created_by: string
+          title: string
+          summary?: string
+          source?: string
+          status?: string
+          steps?: Json
+          provider_needs?: Json
+          risks?: Json
+          budget_guidance?: string
+          timeline_guidance?: string
+          approved_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          request_id?: string
+          created_by?: string
+          title?: string
+          summary?: string
+          source?: string
+          status?: string
+          steps?: Json
+          provider_needs?: Json
+          risks?: Json
+          budget_guidance?: string
+          timeline_guidance?: string
+          approved_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "request_execution_plans_request_id_fkey"; columns: ["request_id"]; isOneToOne: true; referencedRelation: "requests"; referencedColumns: ["id"] }
+        ]
+      }
       tasks: {
         Row: {
           assigned_to: string | null
