@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type EventType = "proposal_received" | "proposal_accepted" | "proposal_rejected" | "project_message" | "task_updated" | "milestone_completed" | "evidence_uploaded";
+type EventType = "proposal_received" | "proposal_accepted" | "proposal_rejected" | "project_message" | "task_updated" | "milestone_completed" | "evidence_uploaded" | "appointment_requested" | "appointment_confirmed" | "appointment_declined" | "appointment_cancelled" | "appointment_reminder" | "schedule_response_due" | "task_overdue" | "milestone_overdue";
 type Preference = { event_type: EventType; in_app_enabled: boolean; email_enabled: boolean; push_enabled: boolean };
 
 const labels: Record<EventType,{title:string;description:string}> = {
@@ -15,6 +15,14 @@ const labels: Record<EventType,{title:string;description:string}> = {
   task_updated:{title:"Task updates",description:"When a task is assigned or its status changes."},
   milestone_completed:{title:"Milestones completed",description:"When a project milestone is marked complete."},
   evidence_uploaded:{title:"New evidence",description:"When someone uploads a project file or proof."},
+  appointment_requested:{title:"Appointment requests",description:"When a customer asks you to schedule project work."},
+  appointment_confirmed:{title:"Appointment confirmed",description:"When your requested appointment is confirmed."},
+  appointment_declined:{title:"Appointment declined",description:"When an appointment request is declined."},
+  appointment_cancelled:{title:"Appointment cancelled",description:"When a scheduled appointment is cancelled."},
+  appointment_reminder:{title:"Appointment reminders",description:"Reminders 24 hours and one hour before confirmed appointments."},
+  schedule_response_due:{title:"Appointment response needed",description:"When a customer is waiting for your appointment response."},
+  task_overdue:{title:"Overdue tasks",description:"When an assigned task passes its due time."},
+  milestone_overdue:{title:"Overdue milestones",description:"When a project milestone passes its due date."},
 };
 
 export default function NotificationPreferences({userId,initialPreferences}:{userId:string;initialPreferences:Preference[]}) {
