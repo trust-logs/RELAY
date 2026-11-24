@@ -38,12 +38,30 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const {data: profiles} = ids.length ? await supabase.from("profiles").select("id,display_name").in("id",ids) : {data:[]};
   const names = new Map((profiles ?? []).map(p=>[p.id,p.display_name || "RELAY member"]));
   const assignedMembers = (members ?? []).filter(m=>m.user_id !== userId);
-  const doneTasks = (tasks ?? []).filter(t=>t.status === "completed").length;
-  const blockedTasks = (tasks ?? []).filter(t=>t.status === "blocked");
-  const reviewTasks = (tasks ?? []).filter(t=>t.status === "awaiting_review");
-  const overdueTasks = (tasks ?? []).filter(t=>t.due_at && new Date(t.due_at) < new Date() && !["completed","cancelled"].includes(t.status));
-  const missingEvidenceTasks = (tasks ?? []).filter(t=>t.status === "awaiting_review" && !(attachments ?? []).some(a=>a.task_id===t.id));
-  const doneMilestones = (milestones ?? []).filter(m=>m.status === "completed").length;
+  // Derive project health signals from the task and evidence records.
+  const doneTasks = (tasks ?? []).filter(
+    (task) => task.status === "completed",
+  ).length;
+  const blockedTasks = (tasks ?? []).filter(
+    (task) => task.status === "blocked",
+  );
+  const reviewTasks = (tasks ?? []).filter(
+    (task) => task.status === "awaiting_review",
+  );
+  const overdueTasks = (tasks ?? []).filter(
+    (task) =>
+      task.due_at &&
+      new Date(task.due_at) < new Date() &&
+      !["completed", "cancelled"].includes(task.status),
+  );
+  const missingEvidenceTasks = (tasks ?? []).filter(
+    (task) =>
+      task.status === "awaiting_review" &&
+      !(attachments ?? []).some((attachment) => attachment.task_id === task.id),
+  );
+  const doneMilestones = (milestones ?? []).filter(
+    (milestone) => milestone.status === "completed",
+  ).length;
   return <main className="dashboard-shell">
     <nav className="nav dashboard-nav"><Link className="brand" href="/"><span className="brand-mark">R</span><span>RELAY<span className="brand-period">.</span></span></Link><div className="trust-nav-actions"><Link className="signout-button trust-back-link" href="/dashboard/projects">← Projects</Link><form action={signOut}><button className="signout-button" type="submit">Sign out ↗</button></form></div></nav>
     <section className="network-page project-workspace">
